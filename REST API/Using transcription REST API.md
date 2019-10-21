@@ -14,15 +14,6 @@ POST /api/speechtotext/v2.1/transcriptions/ HTTP/1.1
 Host: <region>.cris.ai
 Content-Type: application/json
 Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
-User-Agent: PostmanRuntime/7.17.1
-Accept: */*
-Cache-Control: no-cache
-Host: westeurope.cris.ai
-Accept-Encoding: gzip, deflate
-Content-Length: 545
-Connection: keep-alive
-cache-control: no-cache
-
 {
   "description": "<optional description of the transcription>",
   "locale": "en-US",
