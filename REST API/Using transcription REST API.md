@@ -40,7 +40,9 @@ In the above request, extracted from Postman, you only need to update:
 
 ## Getting the result for the transcription
 
-There are a couple of REST calls that allow you to get a list of transcriptions:
+There are a couple of REST calls that allow you to get transcription results. 
+
+## List of all transcriptions
 ### Request
 ```
 GET /api/speechtotext/v2.1/transcriptions/ HTTP/1.1
@@ -49,7 +51,7 @@ Content-Type: application/json
 Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
 ```
 ### Response
-```
+```json
 [
   {
     "results": [
@@ -115,11 +117,11 @@ Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
   }
 ]
 ```
-
-or if you have the transaction ID already, then you can request for this one specifically
+## Specific Transcription
+If you have the transaction ID already, then you can request for this one specifically
 
 ```
-GET /api/speechtotext/v2.1/transcriptions/__<id>__ HTTP/1.1
+GET /api/speechtotext/v2.1/transcriptions/<id> HTTP/1.1
 Host: <region>.cris.ai
 Content-Type: application/json
 Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
