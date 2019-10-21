@@ -37,7 +37,7 @@ cache-control: no-cache
   "recordingsUrls": ["<url to MP3 file (in blob storage)>"]
 }
 ```
-### Reapomse
+### Response
 ```
 202 Accepted
 ```
