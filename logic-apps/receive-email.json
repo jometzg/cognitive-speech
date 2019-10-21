@@ -1,0 +1,233 @@
+{
+    "$connections": {
+        "value": {
+            "azureblob": {
+                "connectionId": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/resourceGroups/speechtranscription-rg/providers/Microsoft.Web/connections/azureblob",
+                "connectionName": "azureblob",
+                "id": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/azureblob"
+            },
+            "keyvault_1": {
+                "connectionId": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/resourceGroups/speechtranscription-rg/providers/Microsoft.Web/connections/keyvault-1",
+                "connectionName": "keyvault-1",
+                "id": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/keyvault"
+            },
+            "outlook": {
+                "connectionId": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/resourceGroups/speechtranscription-rg/providers/Microsoft.Web/connections/outlook-1",
+                "connectionName": "outlook-1",
+                "id": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/outlook"
+            }
+        }
+    },
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Get_cognitive-account": {
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['keyvault_1']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/secrets/@{encodeURIComponent('cognitive-account')}/value"
+                },
+                "runAfter": {},
+                "type": "ApiConnection"
+            },
+            "Get_storage-account": {
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['keyvault_1']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/secrets/@{encodeURIComponent('storage-account')}/value"
+                },
+                "runAfter": {
+                    "congitive-secret": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "If_email_subject_is_\"audio\"": {
+                "actions": {
+                    "For_each": {
+                        "actions": {
+                            "Call_batch_REST_API": {
+                                "inputs": {
+                                    "body": {
+                                        "description": "<optional description of the transcription>",
+                                        "locale": "en-US",
+                                        "models": [],
+                                        "name": "@{items('For_each')?['Name']}",
+                                        "properties": {
+                                            "AddSentiment": "True",
+                                            "AddWordLevelTimestamps": "True",
+                                            "ProfanityFilterMode": "Masked",
+                                            "PunctuationMode": "DictatedAndAutomatic"
+                                        },
+                                        "recordingsUrls": [
+                                            "@{body('Get_storage-account')?['value']}/input/@{replace(items('For_each')?['Name'], ' ','%20')}@{body('input-sas')?['value']}"
+                                        ]
+                                    },
+                                    "headers": {
+                                        "Ocp-Apim-Subscription-Key": "@body('congitive-secret')?['value']"
+                                    },
+                                    "method": "POST",
+                                    "uri": "@{body('Get_cognitive-account')?['value']}/api/speechtotext/v2.1/transcriptions"
+                                },
+                                "runAfter": {
+                                    "Create_return_address_blob": [
+                                        "Succeeded"
+                                    ]
+                                },
+                                "type": "Http"
+                            },
+                            "Create_MP3_blob": {
+                                "inputs": {
+                                    "body": "@base64ToBinary(items('For_each')?['ContentBytes'])",
+                                    "host": {
+                                        "connection": {
+                                            "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                        }
+                                    },
+                                    "method": "post",
+                                    "path": "/datasets/default/files",
+                                    "queries": {
+                                        "folderPath": "/input",
+                                        "name": "@items('For_each')?['Name']",
+                                        "queryParametersSingleEncoded": true
+                                    }
+                                },
+                                "runAfter": {},
+                                "runtimeConfiguration": {
+                                    "contentTransfer": {
+                                        "transferMode": "Chunked"
+                                    }
+                                },
+                                "type": "ApiConnection"
+                            },
+                            "Create_return_address_blob": {
+                                "inputs": {
+                                    "body": "@triggerBody()?['From']",
+                                    "host": {
+                                        "connection": {
+                                            "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                        }
+                                    },
+                                    "method": "post",
+                                    "path": "/datasets/default/files",
+                                    "queries": {
+                                        "folderPath": "/output",
+                                        "name": "@{items('For_each')?['Name']}.return.txt",
+                                        "queryParametersSingleEncoded": true
+                                    }
+                                },
+                                "runAfter": {
+                                    "Create_MP3_blob": [
+                                        "Succeeded"
+                                    ]
+                                },
+                                "runtimeConfiguration": {
+                                    "contentTransfer": {
+                                        "transferMode": "Chunked"
+                                    }
+                                },
+                                "type": "ApiConnection"
+                            }
+                        },
+                        "description": "for each attachment",
+                        "foreach": "@triggerBody()?['Attachments']",
+                        "runAfter": {},
+                        "type": "Foreach"
+                    }
+                },
+                "expression": {
+                    "and": [
+                        {
+                            "equals": [
+                                "@triggerBody()?['Subject']",
+                                "audio"
+                            ]
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "input-sas": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "If"
+            },
+            "congitive-secret": {
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['keyvault_1']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/secrets/@{encodeURIComponent('cognitive-key')}/value"
+                },
+                "runAfter": {
+                    "Get_cognitive-account": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "input-sas": {
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['keyvault_1']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/secrets/@{encodeURIComponent('input-sas')}/value"
+                },
+                "runAfter": {
+                    "Get_storage-account": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "defaultValue": {},
+                "type": "Object"
+            }
+        },
+        "triggers": {
+            "When_a_new_email_arrives": {
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['outlook']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/Mail/OnNewEmail",
+                    "queries": {
+                        "fetchOnlyWithAttachment": true,
+                        "folderPath": "Inbox",
+                        "importance": "Any",
+                        "includeAttachments": true
+                    }
+                },
+                "recurrence": {
+                    "frequency": "Minute",
+                    "interval": 3
+                },
+                "splitOn": "@triggerBody()?['value']",
+                "type": "ApiConnection"
+            }
+        }
+    }
+}

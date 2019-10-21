@@ -1,0 +1,431 @@
+{
+    "$connections": {
+        "value": {
+            "azureblob": {
+                "connectionId": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/resourceGroups/speechtranscription-rg/providers/Microsoft.Web/connections/azureblob",
+                "connectionName": "azureblob",
+                "id": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/azureblob"
+            },
+            "outlook": {
+                "connectionId": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/resourceGroups/speechtranscription-rg/providers/Microsoft.Web/connections/outlook-1",
+                "connectionName": "outlook-1",
+                "id": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/outlook"
+            }
+        }
+    },
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "If_status_is_\"Succeeded\"": {
+                "actions": {
+                    "Create_transcription_blob": {
+                        "inputs": {
+                            "body": "@body('Parse_JSON')?['AudioFileResults'][0].CombinedResults[0].Display",
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                }
+                            },
+                            "method": "post",
+                            "path": "/datasets/default/files",
+                            "queries": {
+                                "folderPath": "/output",
+                                "name": "@{body('Parse_JSON')?['AudioFileResults'][0].AudioFileName}.trans",
+                                "queryParametersSingleEncoded": true
+                            }
+                        },
+                        "runAfter": {
+                            "Parse_JSON": [
+                                "Succeeded"
+                            ]
+                        },
+                        "runtimeConfiguration": {
+                            "contentTransfer": {
+                                "transferMode": "Chunked"
+                            }
+                        },
+                        "type": "ApiConnection"
+                    },
+                    "Get_return_address_blob_content": {
+                        "inputs": {
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                }
+                            },
+                            "method": "get",
+                            "path": "/datasets/default/files/@{encodeURIComponent(encodeURIComponent('/output/',triggerBody()?['name'],'.return.txt'))}/content",
+                            "queries": {
+                                "inferContentType": true
+                            }
+                        },
+                        "runAfter": {
+                            "Create_transcription_blob": [
+                                "Succeeded"
+                            ]
+                        },
+                        "type": "ApiConnection"
+                    },
+                    "HTTP": {
+                        "inputs": {
+                            "method": "GET",
+                            "uri": "@{triggerBody()?['results'][0].resultUrls[0].resultUrl}"
+                        },
+                        "runAfter": {},
+                        "type": "Http"
+                    },
+                    "Parse_JSON": {
+                        "inputs": {
+                            "content": "@body('HTTP')",
+                            "schema": {
+                                "properties": {
+                                    "AudioFileResults": {
+                                        "items": {
+                                            "properties": {
+                                                "AudioFileName": {
+                                                    "type": "string"
+                                                },
+                                                "AudioFileUrl": {
+                                                    "type": "string"
+                                                },
+                                                "AudioLengthInSeconds": {
+                                                    "type": "number"
+                                                },
+                                                "CombinedResults": {
+                                                    "items": {
+                                                        "properties": {
+                                                            "ChannelNumber": {
+                                                                "type": "string"
+                                                            },
+                                                            "Display": {
+                                                                "type": "string"
+                                                            },
+                                                            "ITN": {
+                                                                "type": "string"
+                                                            },
+                                                            "Lexical": {
+                                                                "type": "string"
+                                                            },
+                                                            "MaskedITN": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "ChannelNumber",
+                                                            "Lexical",
+                                                            "ITN",
+                                                            "MaskedITN",
+                                                            "Display"
+                                                        ],
+                                                        "type": "object"
+                                                    },
+                                                    "type": "array"
+                                                },
+                                                "SegmentResults": {
+                                                    "items": {
+                                                        "properties": {
+                                                            "ChannelNumber": {
+                                                                "type": "string"
+                                                            },
+                                                            "Duration": {
+                                                                "type": "integer"
+                                                            },
+                                                            "DurationInSeconds": {
+                                                                "type": "number"
+                                                            },
+                                                            "NBest": {
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "Confidence": {
+                                                                            "type": "number"
+                                                                        },
+                                                                        "Display": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "ITN": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "Lexical": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "MaskedITN": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "Sentiment": {
+                                                                            "properties": {
+                                                                                "Negative": {
+                                                                                    "type": "number"
+                                                                                },
+                                                                                "Neutral": {
+                                                                                    "type": "number"
+                                                                                },
+                                                                                "Positive": {
+                                                                                    "type": "integer"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "Words": {}
+                                                                    },
+                                                                    "required": [
+                                                                        "Confidence",
+                                                                        "Lexical",
+                                                                        "ITN",
+                                                                        "MaskedITN",
+                                                                        "Display",
+                                                                        "Sentiment",
+                                                                        "Words"
+                                                                    ],
+                                                                    "type": "object"
+                                                                },
+                                                                "type": "array"
+                                                            },
+                                                            "Offset": {
+                                                                "type": "integer"
+                                                            },
+                                                            "OffsetInSeconds": {
+                                                                "type": "number"
+                                                            },
+                                                            "RecognitionStatus": {
+                                                                "type": "string"
+                                                            },
+                                                            "SpeakerId": {}
+                                                        },
+                                                        "required": [
+                                                            "RecognitionStatus",
+                                                            "ChannelNumber",
+                                                            "SpeakerId",
+                                                            "Offset",
+                                                            "Duration",
+                                                            "OffsetInSeconds",
+                                                            "DurationInSeconds",
+                                                            "NBest"
+                                                        ],
+                                                        "type": "object"
+                                                    },
+                                                    "type": "array"
+                                                }
+                                            },
+                                            "required": [
+                                                "AudioFileName",
+                                                "AudioFileUrl",
+                                                "AudioLengthInSeconds",
+                                                "CombinedResults",
+                                                "SegmentResults"
+                                            ],
+                                            "type": "object"
+                                        },
+                                        "type": "array"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "runAfter": {
+                            "HTTP": [
+                                "Succeeded"
+                            ]
+                        },
+                        "type": "ParseJson"
+                    },
+                    "Send_an_email": {
+                        "inputs": {
+                            "body": {
+                                "Body": "@{body('Parse_JSON')?['AudioFileResults'][0].CombinedResults[0].Display}",
+                                "Subject": "Your transcription",
+                                "To": "@body('Get_return_address_blob_content')"
+                            },
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['outlook']['connectionId']"
+                                }
+                            },
+                            "method": "post",
+                            "path": "/Mail"
+                        },
+                        "runAfter": {
+                            "Get_return_address_blob_content": [
+                                "Succeeded"
+                            ]
+                        },
+                        "type": "ApiConnection"
+                    }
+                },
+                "expression": {
+                    "and": [
+                        {
+                            "equals": [
+                                "@triggerBody()?['status']",
+                                "Succeeded"
+                            ]
+                        }
+                    ]
+                },
+                "runAfter": {},
+                "type": "If"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "defaultValue": {},
+                "type": "Object"
+            }
+        },
+        "triggers": {
+            "manual": {
+                "inputs": {
+                    "schema": {
+                        "properties": {
+                            "createdDateTime": {
+                                "type": "string"
+                            },
+                            "datasets": {
+                                "type": "array"
+                            },
+                            "description": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "string"
+                            },
+                            "lastActionDateTime": {
+                                "type": "string"
+                            },
+                            "locale": {
+                                "type": "string"
+                            },
+                            "models": {
+                                "items": {
+                                    "properties": {
+                                        "createdDateTime": {
+                                            "type": "string"
+                                        },
+                                        "datasets": {
+                                            "type": "array"
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        },
+                                        "id": {
+                                            "type": "string"
+                                        },
+                                        "lastActionDateTime": {
+                                            "type": "string"
+                                        },
+                                        "locale": {
+                                            "type": "string"
+                                        },
+                                        "modelKind": {
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "properties": {
+                                            "properties": {
+                                                "ModelClass": {
+                                                    "type": "string"
+                                                },
+                                                "Purpose": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "modelKind",
+                                        "datasets",
+                                        "id",
+                                        "createdDateTime",
+                                        "lastActionDateTime",
+                                        "status",
+                                        "locale",
+                                        "name",
+                                        "description",
+                                        "properties"
+                                    ],
+                                    "type": "object"
+                                },
+                                "type": "array"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "properties": {
+                                "properties": {
+                                    "AddSentiment": {
+                                        "type": "string"
+                                    },
+                                    "CustomPronunciation": {
+                                        "type": "string"
+                                    },
+                                    "Duration": {
+                                        "type": "string"
+                                    },
+                                    "ProfanityFilterMode": {
+                                        "type": "string"
+                                    },
+                                    "PunctuationMode": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "reportFileUrl": {
+                                "type": "string"
+                            },
+                            "results": {
+                                "items": {
+                                    "properties": {
+                                        "recordingsUrl": {
+                                            "type": "string"
+                                        },
+                                        "resultUrls": {
+                                            "items": {
+                                                "properties": {
+                                                    "fileName": {
+                                                        "type": "string"
+                                                    },
+                                                    "resultUrl": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "fileName",
+                                                    "resultUrl"
+                                                ],
+                                                "type": "object"
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "required": [
+                                        "recordingsUrl",
+                                        "resultUrls"
+                                    ],
+                                    "type": "object"
+                                },
+                                "type": "array"
+                            },
+                            "status": {
+                                "type": "string"
+                            },
+                            "statusMessage": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "kind": "Http",
+                "type": "Request"
+            }
+        }
+    }
+}
