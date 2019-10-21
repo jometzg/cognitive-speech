@@ -127,3 +127,37 @@ Content-Type: application/json
 Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
 
 ```
+
+# Webhooks
+Webhooks allow you to register an endpoint to receive transcription results once they are ready. A *webhook* is merely an HTTP endpoint that you register to receive results. This is web endpoint that responds to HTTP *POST* requests.
+
+Azure web apps, functions and logic apps can recieve webhooks.
+
+## Register a webhook
+### Request
+```
+POST /api/speechtotext/v2.1/transcriptions/hooks HTTP/1.1
+Host: <region>.cris.ai
+Content-Type: application/json
+Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
+
+{
+  "configuration": {
+    "url": "< URL of webhook. For a logic app, this can be copied from the HTTP trigger step >",
+    "secret": "<my_secret>"
+  },
+  "events": [
+    "TranscriptionCompletion"
+  ],
+  "active": true,
+  "name": "TranscriptionCompletionWebHook",
+  "description": "This is a Webhook created to trigger an HTTP POST request when my audio file transcription is completed.",
+  "properties": {
+      "Active" : "True"
+  }
+
+}
+
+}
+```
+### Response
