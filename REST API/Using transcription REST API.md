@@ -197,7 +197,7 @@ Note that the response from the trasncription request does not itself contain th
   "AudioFileResults": [
     {
       "AudioFileName": "transcription_0",
-      "AudioFileUrl": "https://jjspeechsa.blob.core.windows.net/input/Recording%20091535-073119.mp3?st=2019-10-18T15:24:41Z&se=2020-10-19T15:24:00Z&sp=rl&sv=2018-03-28&sr=c&sig=%2FKT%2FNEVm9JZaq8jQtOgmZIP%2FDCroWbzl2WEJh4KwBtw%3D",
+      "AudioFileUrl": "https://jjspeechsa.blob.core.windows.net/input/Recording%20091535-073119.mp3?XXX-SAS-XXXX",
       "AudioLengthInSeconds": 24.43,
       "CombinedResults": [
         {
