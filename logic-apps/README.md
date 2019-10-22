@@ -11,7 +11,9 @@ The infrastructure comprises:
 
 ![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/Azure-resources.png "resources in the portal")
 
-These can be built in the portal, CLI or ARM/Terraform.
+These can be built in the portal, CLI or ARM/Terraform. 
+
+An ARM template can be found [here](https://github.com/jometzg/cognitive-speech/blob/master/templates/template.json)
 
 ## Receive email logic app
 
