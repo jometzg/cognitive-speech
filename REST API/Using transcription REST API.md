@@ -132,7 +132,7 @@ Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
 {
   "results": [
     {
-      "recordingsUrl": "https://jjspeechsa.blob.core.windows.net/input/Recording 091535-073119.mp3?st=2019-10-18T15:24:41Z&se=2020-10-19T15:24:00Z&sp=rl&sv=2018-03-28&sr=c&sig=%2FKT%2FNEVm9JZaq8jQtOgmZIP%2FDCroWbzl2WEJh4KwBtw%3D",
+      "recordingsUrl": "https://jjspeechsa.blob.core.windows.net/input/Recording 091535-073119.mp3?XXX-SAS-XXXX",
       "resultUrls": [
         {
           "fileName": "transcription_0",
@@ -191,7 +191,7 @@ Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
   }
 }
 ```
-Note that the response from the trasncription request does not itself contain the text of the transcription, but points to a URL where the response from the transcription can be found. This is another storage area (that belongs to the Speech Service) and if you open that URL you will get the response data, a sample of which is shown below:
+Note that the response from the trasncription request does not itself contain the text of the transcription, but the __resultUrl__ field points to a URL where the response from the transcription can be found. This is another storage area (that belongs to the Speech Service) and if you open that URL you will get the response data, a sample of which is shown below:
 ```json
 {
   "AudioFileResults": [
