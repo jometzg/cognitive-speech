@@ -272,3 +272,26 @@ Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
 }
 ```
 ### Response
+```json
+{
+  "id": "209e1864-97a8-44e3-866b-f74880ef6e08",
+  "name": "TranscriptionCompletionWebHook",
+  "description": "This is a Webhook created to trigger an HTTP POST request when my audio file transcription is completed.",
+  "configuration": {
+    "url": "< url of logic app HTTP trigger >"
+  },
+  "events": [
+    "TranscriptionCompletion"
+  ],
+  "active": true,
+  "pingUrl": "https://westeurope.cris.ai:443/api/speechtotext/v2.1/transcriptions/hooks/209e1864-97a8-44e3-866b-f74880ef6e08/ping",
+  "testUrl": "https://westeurope.cris.ai:443/api/speechtotext/v2.1/transcriptions/hooks/209e1864-97a8-44e3-866b-f74880ef6e08/test",
+  "apiVersion": "v2.1",
+  "createdDateTime": "2019-10-21T16:37:54Z",
+  "lastActionDateTime": "2019-10-21T16:37:54Z",
+  "status": "Succeeded",
+  "properties": {
+    "Active": "True"
+  }
+}
+```
