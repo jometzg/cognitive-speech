@@ -8,6 +8,7 @@ This demonstation is a stand-alone one which uses cognitive services speech reco
 
 ![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/overview-diagram.png "Overview diagram")
 
+More detail on the demonstration can be found here [demonstration flow](https://github.com/jometzg/cognitive-speech/blob/master/demo-flow/README.md)
 
 # Getting Started
 This demonstration requires access to an Azure subscription. If you don't have an Azure subscription, a trial one can be created here https://azure.microsoft.com/en-gb/free/
