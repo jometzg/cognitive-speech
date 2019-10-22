@@ -6,7 +6,7 @@ A number of organisations would have uses for the automated transcription of aud
 # This Demonstration
 This demonstation is a stand-alone one which uses cognitive services speech recognition with Azure serverless technologies to demonstrate audio transcription. To keep the demonstration self-contained, it uses audio MP3 file attachments to an email and then responds with the transcription in an email reply. This is not exactly how it would be done in production, but can easily be demonstrated.
 
-!(https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/overview-diagram.png)
+![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/overview-diagram.png "Overview diagram")
 
 
 # Getting Started
