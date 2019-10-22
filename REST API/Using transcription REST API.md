@@ -119,13 +119,124 @@ Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
 ```
 ## Specific Transcription
 If you have the transaction ID already, then you can request for this one specifically
-
+### Request
 ```
 GET /api/speechtotext/v2.1/transcriptions/<id> HTTP/1.1
 Host: <region>.cris.ai
 Content-Type: application/json
 Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
 
+```
+### Response
+```json
+{
+  "results": [
+    {
+      "recordingsUrl": "https://jjspeechsa.blob.core.windows.net/input/Recording 091535-073119.mp3?st=2019-10-18T15:24:41Z&se=2020-10-19T15:24:00Z&sp=rl&sv=2018-03-28&sr=c&sig=%2FKT%2FNEVm9JZaq8jQtOgmZIP%2FDCroWbzl2WEJh4KwBtw%3D",
+      "resultUrls": [
+        {
+          "fileName": "transcription_0",
+          "resultUrl": "https://spsvcprodweu.blob.core.windows.net/bestor-acc02701-cb45-42dc-9d32-2843911017ca/TranscriptionData/b2d494b1-e142-4943-9a20-84a7a52ce8db.json?sv=2017-04-17&sr=b&sig=07P%2FSvqwQOv7dup43fVIuDXLsijhW8gYM%2ByFmvowskg%3D&st=2019-10-21T09:32:13Z&se=2019-10-24T09:37:13Z&sp=rl"
+        }
+      ]
+    }
+  ],
+  "datasets": [],
+  "models": [
+    {
+      "modelKind": "AcousticAndLanguage",
+      "datasets": [],
+      "id": "6a69a05c-7753-4d78-a698-79429d946e6a",
+      "createdDateTime": "2019-10-17T03:00:00Z",
+      "lastActionDateTime": "2019-10-17T03:30:00Z",
+      "status": "Succeeded",
+      "locale": "en-US",
+      "name": "20190520 (v4.14 Unified)",
+      "description": "Unified",
+      "properties": {
+        "Purpose": "OnlineTranscription,BatchTranscription,LanguageAdaptation,LanguageOnlineInterpolation",
+        "ModelClass": "unified-v4"
+      }
+    },
+    {
+      "modelKind": "Sentiment",
+      "datasets": [],
+      "id": "13413008-c050-4af0-bd13-92af6464bb7e",
+      "createdDateTime": "2019-04-25T12:35:20Z",
+      "lastActionDateTime": "2019-04-25T12:36:52Z",
+      "status": "Succeeded",
+      "locale": "en-US",
+      "name": "sentiment-en-us-bert-v0-0",
+      "description": "Sentiment Models for en-US",
+      "properties": {
+        "Purpose": "BatchTranscription,BatchSentimentAnalysis"
+      }
+    }
+  ],
+  "reportFileUrl": "https://spsvcprodweu.blob.core.windows.net/bestor-acc02701-cb45-42dc-9d32-2843911017ca/TranscriptionData/860997ed-947f-4ed2-8d6d-1b312ba0d24b.txt?sv=2017-04-17&sr=b&sig=14edOt8Zdrd6NoFxZBEhPqpAOp2kRp6yMjimp5nluvM%3D&st=2019-10-21T09:32:13Z&se=2019-10-24T09:37:13Z&sp=rl",
+  "statusMessage": "None.",
+  "id": "dedffd77-218f-4052-b07a-4a4061530fba",
+  "createdDateTime": "2019-10-18T15:48:03Z",
+  "lastActionDateTime": "2019-10-18T15:48:38Z",
+  "status": "Succeeded",
+  "locale": "en-US",
+  "name": "shortone",
+  "description": "An optional description of the transcription.",
+  "properties": {
+    "ProfanityFilterMode": "Masked",
+    "PunctuationMode": "DictatedAndAutomatic",
+    "AddSentiment": "True",
+    "CustomPronunciation": "False",
+    "Duration": "00:00:24"
+  }
+}
+```
+Note that the response from the trasncription request does not itself contain the text of the transcription, but points to a URL where the response from the transcription can be found. This is another storage area (that belongs to the Speech Service) and if you open that URL you will get the response data, a sample of which is shown below:
+```json
+{
+  "AudioFileResults": [
+    {
+      "AudioFileName": "transcription_0",
+      "AudioFileUrl": "https://jjspeechsa.blob.core.windows.net/input/Recording%20091535-073119.mp3?st=2019-10-18T15:24:41Z&se=2020-10-19T15:24:00Z&sp=rl&sv=2018-03-28&sr=c&sig=%2FKT%2FNEVm9JZaq8jQtOgmZIP%2FDCroWbzl2WEJh4KwBtw%3D",
+      "AudioLengthInSeconds": 24.43,
+      "CombinedResults": [
+        {
+          "ChannelNumber": "0",
+          "Lexical": "ten democratic presidential hopefuls have clashed in a televised US debate that laid bare the parties deep divisions over how best to in twenty twenty elizabeth warren and bernie sanders the most liberal candidates in the crowd crowded field came under attack from their more moderate colleagues three other women and seven men on stage in michigan debated healthcare border policy and how to defeat donald trump",
+          "ITN": "10 Democratic presidential hopefuls have clashed in a televised US debate that laid bare the parties deep divisions over how best to in 2020 Elizabeth Warren and Bernie Sanders the most liberal candidates in the crowd crowded field came under attack from their more moderate colleagues Three other women and 7 men on stage in Michigan debated healthcare border policy and how to defeat Donald Trump",
+          "MaskedITN": "10 Democratic presidential hopefuls have clashed in a televised US debate that laid bare the parties deep divisions over how best to in 2020 Elizabeth Warren and Bernie Sanders the most liberal candidates in the crowd crowded field came under attack from their more moderate colleagues Three other women and 7 men on stage in Michigan debated healthcare border policy and how to defeat Donald Trump",
+          "Display": "10 Democratic presidential hopefuls have clashed in a televised US debate that laid bare the parties deep divisions over how best to in 2020. Elizabeth Warren and Bernie Sanders, the most liberal candidates in the crowd crowded field came under attack from their more moderate colleagues. Three other women and 7 men on stage in Michigan, debated healthcare border policy and how to defeat Donald Trump."
+        }
+      ],
+      "SegmentResults": [
+        {
+          "RecognitionStatus": "Success",
+          "ChannelNumber": "0",
+          "SpeakerId": null,
+          "Offset": 16800000,
+          "Duration": 219200000,
+          "OffsetInSeconds": 1.68,
+          "DurationInSeconds": 21.92,
+          "NBest": [
+            {
+              "Confidence": 0.898624659,
+              "Lexical": "ten democratic presidential hopefuls have clashed in a televised US debate that laid bare the parties deep divisions over how best to in twenty twenty elizabeth warren and bernie sanders the most liberal candidates in the crowd crowded field came under attack from their more moderate colleagues three other women and seven men on stage in michigan debated healthcare border policy and how to defeat donald trump",
+              "ITN": "10 Democratic presidential hopefuls have clashed in a televised US debate that laid bare the parties deep divisions over how best to in 2020 Elizabeth Warren and Bernie Sanders the most liberal candidates in the crowd crowded field came under attack from their more moderate colleagues Three other women and 7 men on stage in Michigan debated healthcare border policy and how to defeat Donald Trump",
+              "MaskedITN": "10 Democratic presidential hopefuls have clashed in a televised US debate that laid bare the parties deep divisions over how best to in 2020 Elizabeth Warren and Bernie Sanders the most liberal candidates in the crowd crowded field came under attack from their more moderate colleagues Three other women and 7 men on stage in Michigan debated healthcare border policy and how to defeat Donald Trump",
+              "Display": "10 Democratic presidential hopefuls have clashed in a televised US debate that laid bare the parties deep divisions over how best to in 2020. Elizabeth Warren and Bernie Sanders, the most liberal candidates in the crowd crowded field came under attack from their more moderate colleagues. Three other women and 7 men on stage in Michigan, debated healthcare border policy and how to defeat Donald Trump.",
+              "Sentiment": {
+                "Negative": 0.150532,
+                "Neutral": 0.849462,
+                "Positive": 0.0
+              },
+              "Words": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
 ```
 
 # Webhooks
