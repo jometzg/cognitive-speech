@@ -9,7 +9,7 @@ The infrastructure comprises:
 3. Key vault
 4. 2 logic apps and their connectors
 
-![alt text](logic-apps/Azure-resources.png "resources in the portal")
+![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/Azure-resources.png "resources in the portal")
 
 These can be built in the portal, CLI or ARM/Terraform.
 
