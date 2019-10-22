@@ -20,3 +20,5 @@ The demonstration requires a number of resources:
 3. A storage account for blobs
 4. An email account to integrate
 5. Logic apps
+
+Detailed instructions on building the demonstration is [here](https://github.com/jometzg/cognitive-speech/tree/master/logic-apps)
