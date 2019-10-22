@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_webhook_name": {
+            "value": null
+        },
+        "connections_azureblob_name": {
+            "value": null
+        },
+        "connections_outlook_1_name": {
+            "value": null
+        },
+        "connections_keyvault_1_name": {
+            "value": null
+        },
+        "vaults_speechsecrets_name": {
+            "value": null
+        },
+        "workflows_receive_email_name": {
+            "value": null
+        },
+        "storageAccounts_jjspeechsa_name": {
+            "value": null
+        },
+        "accounts_jjspeech2_name": {
+            "value": null
+        },
+        "actionGroups_Application_20Insights_20Smart_20Detection_name": {
+            "value": null
+        }
+    }
+}
