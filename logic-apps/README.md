@@ -66,10 +66,10 @@ This logic app is called by the Cognitive services batch transcription API when 
 If the status of the response message is "Succeeded", then we will process the response. Otherwise do nothing.
 
 The response message from the webhook call does not itself contain the transcription, but contains a URL that can then be used to retrieve the trasncription. The steps are therefore:
-1. Pick out of the returned JSON, the URL *triggerBody()?['results'][0].resultUrls[0].resultUrl* that contains the actual results and then retrieve these contents with an HTTP request.
+1. Pick out of the returned JSON, the URL *['results'][0].resultUrls[0].resultUrl* that contains the actual results and then retrieve these contents with an HTTP request.
 2. This HTTP request returns JSON, so JSON parse the response to make it easier to pick out the text of the transcription
-3. Pick out the transcription text *body('Parse_JSON')?['AudioFileResults'][0].CombinedResults[0].Display* and save this in the *output* container in blob storage with the name of the MP3 file suffixed by **.txt**. It should be noted that we do not strictly-speaking need to store this response, but it makes easier debugging.
-4. Using the name of the MP3 as a key, load the blob with the suffix **.return.txt** - this contains the email return address
+3. Pick out the transcription text *['AudioFileResults'][0].CombinedResults[0].Display* and save this in the *output* container in blob storage with the name of the MP3 file suffixed by **.txt**. It should be noted that we do not strictly-speaking need to store this response, but it makes easier debugging.
+4. Using the name of the MP3 as a key, load the blob with the suffix **.return.txt** - this contains the email return address.
 5. Send an email using the retrieved return address and the transcription contents.
 
 The overall workflow is now complete and the sender of the MP3 should now receive and email with the transcription.
