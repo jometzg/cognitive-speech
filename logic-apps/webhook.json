@@ -30,7 +30,7 @@
                             "path": "/datasets/default/files",
                             "queries": {
                                 "folderPath": "/output",
-                                "name": "@{body('Parse_JSON')?['AudioFileResults'][0].AudioFileName}.trans",
+                                "name": "@{triggerBody()?['name']}.trans.txt",
                                 "queryParametersSingleEncoded": true
                             }
                         },
