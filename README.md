@@ -30,4 +30,5 @@ This demonstration is pretty basic in terms of what it does and how it works. Ot
 1. Send a request received aknowledgement receipt to the origniator - useful for long transcriptions which could take some minutes
 2. Use the sentiment analysis capability that is built into the batch API. For long transcriptions, the results are broken up into speech segments (roughly analogous to paragraphs) and sentiment can be returned for each of these segments. The demonstration could be extended to build a spreadsheet or graph of the sentiment across the timeline of the transcription. A practical use of this could be sentiment for customer interviews, so you can see at a glance where the sentiment changes across a number of minutes of an interview.
 3. Handling problems. Right now this demonstration only looks at the positive path. It may be useful to send response emails in the case of where something has gone wrong.
-4. Other integrations besides email. 
+4. Deleting old transcriptions from the batch interface. See [batch transcription](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/batch-transcription)
+5. Other integrations besides email. 
