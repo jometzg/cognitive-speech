@@ -14,3 +14,16 @@ The diagram illustrates the overall flow. Each step has been marked with a numbe
 7. The second logic app has a few things to do. The trigger message from batch transcription returns with the status and another URL which actually contains the transcription details. So this logic app checks the status and if "Succeeded", then finds this URL and calls this using an HTTP request. The response from this contains the result and so is parsed to get the transcription text. Finally, the logic app sends an email back to the originator with the transcription text. It should be noted that the senders email is stored in blob storage in logic app one and is then used to formulate the "To" of the email send in this logic app. Ideally, a database should be used for this, but this is simpler for the purposes of a demonstration.
 8. Finally, the user receives an email with the transcription
 
+# Testing without a phone or app
+This demonstration may be used direftly from an email app, provided you have access to an MP3 file.
+
+There are quite a few public domain audio files. Speeches make [good ones](http://www.obamadownloads.com/mp3s/dnc-2004-speech.mp3)
+
+To test this, download the MP3 and then send it as an attachment. 
+
+![alt text](https://github.com/jometzg/cognitive-speech/blob/master/demo-flow/send-audio-email.png "Send email")
+
+And the response comes back in my inbox:
+
+![alt text](https://github.com/jometzg/cognitive-speech/blob/master/demo-flow/response-email.png "Send email")
+
