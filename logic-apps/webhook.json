@@ -160,12 +160,41 @@
                                                                                     "type": "number"
                                                                                 },
                                                                                 "Positive": {
-                                                                                    "type": "integer"
+                                                                                    "type": "number"
                                                                                 }
                                                                             },
                                                                             "type": "object"
                                                                         },
-                                                                        "Words": {}
+                                                                        "Words": {
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "Duration": {
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "DurationInSeconds": {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "Offset": {
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "OffsetInSeconds": {
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "Word": {
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "Word",
+                                                                                    "Offset",
+                                                                                    "Duration",
+                                                                                    "OffsetInSeconds",
+                                                                                    "DurationInSeconds"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
+                                                                        }
                                                                     },
                                                                     "required": [
                                                                         "Confidence",
