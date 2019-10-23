@@ -42,6 +42,9 @@ The following key vault secrets are not strictly-speaking secrets, but are confi
 1. Cognitive services account URL - used to construct the REST API call later.
 2. The storage account URL - used to construct the URL to the MP3 blob
 
+The secrets used in the key vault are shown below:
+![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/key-vault-secrets.png "key vault secrets needed")
+
 If the subject line of the email is "audio", continue processing. This is to filter out other emails arriving at that email account.
 
 Once this stage has been reached, the real processing starts. What happens next is:
@@ -56,5 +59,19 @@ The completed [code view](https://github.com/jometzg/cognitive-speech/blob/maste
 ## webhook logic app
 
 ![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/webhook-email.png "webhook logic app flow")
+This logic app is called by the Cognitive services batch transcription API when a transcription has completed. For this logic app to be called, this logic app's HTTP trigger endpoint *must* be registered as a webhook. This has been covered in more detail earlier.
+
+**It should be noted that the webhook may contain more than one result, but for the purposes of the demonstration we are only interested in the first result returned. So there are several places in the returned JSON that are array results. We will always be picking the zero element [0] of these arrays. For production code, this may be different**
+
+If the status of the response message is "Succeeded", then we will process the response. Otherwise do nothing.
+
+The response message from the webhook call does not itself contain the transcription, but contains a URL that can then be used to retrieve the trasncription. The steps are therefore:
+1. Pick out of the returned JSON the URL that contains the actual results and then retrieve these contents with an HTTP request.
+2. This HTTP request returns JSON, so JSON parse the response to make it easier to pick out the text of the transcription
+3. Pick out the transcription text and save this in the *output* container in blob storage with the name of the MP3 file suffixed by **.txt**. It should be noted that we do not strictly-speaking need to store this response, but it makes easier debugging.
+4. Using the name of the MP3 as a key, load the blob with the suffix **.return.txt** - this contains the email return address
+5. Send an email using the retrieved return address and the transcription contents.
+
+The overall workflow is now complete and the sender of the MP3 should now receive and email with the transcription.
 
 The completed [code view](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/webhook.json)
