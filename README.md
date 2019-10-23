@@ -23,7 +23,7 @@ The demonstration requires a number of resources:
 4. An email account to integrate
 5. Logic apps
 
-Detailed instructions on building the demonstration is [here](https://github.com/jometzg/cognitive-speech/tree/master/logic-apps)
+Detailed instructions on building the demonstration are [here](https://github.com/jometzg/cognitive-speech/tree/master/logic-apps)
 
 # Extending this demonstration
 This demonstration is pretty basic in terms of what it does and how it works. Other areas where this may be extended could be:
