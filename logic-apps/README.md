@@ -21,7 +21,7 @@ Some care needs to be taken with this account as sometimes the email provider se
 
 ## Setting up the webhook
 Batch transcription of MP3 files can take minutes. Instead of waiting for the reults, it is much more efficient to use webhooks.
-To use webhooks, the webhook needs to be registered with the batch transcription API. This is covered [here](https://github.com/jometzg/cognitive-speech/blob/master/REST API/Using transcription REST API.md).
+To use webhooks, the webhook needs to be registered with the batch transcription API. This is covered [here](https://github.com/jometzg/cognitive-speech/blob/master/REST%20API/Using%20transcription%20REST%20API.md).
 
 The webhook itself needs to point to the second logic app's HTTP trigger endpoint. This can be found by clicking on the "webhook" logic app's HTTP trigger step to reveal the URL. It should be noted that this URL is auto-generated on logic app creation and so will differ on each implementation. Below shows the URL in the logic app designer:
 
@@ -39,8 +39,8 @@ The following steps retreive secrets from a keyvault. These are:
 2. A storage container shared-access secret (SAS). This is a container-level SAS for the input container of the storage account and is used to construct the URL to the MP3 file attachment that later steps put in Azure storage. The SAS may be generated either by using [Azure Storage Explorer](https://azure.microsoft.com/en-gb/features/storage-explorer/) or by using the Azure [CLI](https://docs.microsoft.com/en-us/cli/azure/storage/container?view=azure-cli-latest#az-storage-container-generate-sas). when generating the SAS, make sure that the end date us sufficiently in the future that it does not later break the demo.
 
 The following key vault secrets are not strictly-speaking secrets, but are configuration and have been put in key vault for convenience.
-3. Cognitive services account URL - used to construct the REST API call later.
-4. The storage account URL - used to construct the URL to the MP3 blob
+1. Cognitive services account URL - used to construct the REST API call later.
+2. The storage account URL - used to construct the URL to the MP3 blob
 
 If the subject line of the email is "audio", continue processing. This is to filter out other emails arriving at that email account.
 
