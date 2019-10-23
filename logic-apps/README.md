@@ -21,7 +21,7 @@ Some care needs to be taken with this account as sometimes the email provider se
 
 ## Setting up the webhook
 Batch transcription of MP3 files can take minutes. Instead of waiting for the reults, it is much more efficient to use webhooks.
-To use webhooks, the webhook needs to be registered with the batch transcription API. This is covered here.
+To use webhooks, the webhook needs to be registered with the batch transcription API. This is covered [here](https://github.com/jometzg/cognitive-speech/blob/master/REST API/Using transcription REST API.md).
 
 The webhook itself needs to point to the second logic app's HTTP trigger endpoint. This can be found by clicking on the "webhook" logic app's HTTP trigger step to reveal the URL. It should be noted that this URL is auto-generated on logic app creation and so will differ on each implementation. Below shows the URL in the logic app designer:
 
