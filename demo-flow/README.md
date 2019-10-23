@@ -2,7 +2,7 @@
 
 The diagram illustrates the overall flow. Each step has been marked with a number to show the overall sequence of the flow.
 
-![alt text](https://github.com/jometzg/cognitive-speech/blob/master/demo-flow/flow-diagram.png "Flow diagram")
+![alt text](https://github.com/jometzg/cognitive-speech/blob/master/demo-flow/flow-diagram2.png "Flow diagram")
 
 ## Steps
 1. The diagram illustrates a mobile phone with some means of recording MP3 files and shareing these via email. This has been done as one of the quickest ways in which you can record your own MP3s, but you can "borrow" any MP3 voice recordings (provided these are public domain from elsewhere and email it as an attachment to an email address you configure for the logic app. 
