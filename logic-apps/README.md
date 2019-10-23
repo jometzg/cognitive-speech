@@ -79,6 +79,10 @@ The completed [code view](https://github.com/jometzg/cognitive-speech/blob/maste
 ## Debugging the overall flow
 It can be sometimes difficult to work out what is happing with an synchronous process and this is no different. There are several main sources of debugging what has happened:
 1. Logic apps themselves have a run history and within a specific run each step may be inspected and the values it uses seen (secrets are, however, not visible). You can also "Resubmit" a logic app, which means you can update a logic app and run it with the previous input values. This will alow you to check changes without the need to either send emails or HTTP requests.
+
+![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/run-history.png "Webhook Run history")
+As can be seen above, a step may be opened and its values inspected.
+
 2. Look in Azure storage and see what files are in the *input* and *output* containers. See below:
 
 ### Input container
