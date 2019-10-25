@@ -4,47 +4,59 @@
     "parameters": {
         "workflows_webhook_name": {
             "defaultValue": "webhook",
-            "type": "String"
+            "type": "string"
         },
         "connections_azureblob_name": {
             "defaultValue": "azureblob",
-            "type": "String"
+            "type": "string"
         },
         "connections_outlook_1_name": {
             "defaultValue": "outlook-1",
-            "type": "String"
+            "type": "string"
         },
         "connections_keyvault_1_name": {
             "defaultValue": "keyvault-1",
-            "type": "String"
+            "type": "string"
         },
-        "vaults_speechsecrets_name": {
-            "defaultValue": "speechsecrets",
-            "type": "String"
+        "vaults_speechsecrets_prefix": {
+            "defaultValue": "speech",
+            "type": "string"
+        },
+        "vaults_tenant_id": {
+            "defaultValue": "<Replace_with_your_tenant_id>",
+            "type": "string"
+        },
+        "vaults_identity_id": {
+            "defaultValue": "<Replace_with_your_identity_Id>",
+            "type": "string"
         },
         "workflows_receive_email_name": {
             "defaultValue": "receive-email",
-            "type": "String"
+            "type": "string"
         },
-        "storageAccounts_jjspeechsa_name": {
-            "defaultValue": "jjspeechsa",
-            "type": "String"
+        "storageAccounts_storagePrefix": {
+            "defaultValue": "speechsa",
+            "type": "string"
         },
-        "accounts_jjspeech2_name": {
-            "defaultValue": "jjspeech2",
-            "type": "String"
+        "accounts_cogPrefix": {
+            "defaultValue": "speech2",
+            "type": "string"
         },
         "actionGroups_Application_20Insights_20Smart_20Detection_name": {
             "defaultValue": "Application%20Insights%20Smart%20Detection",
-            "type": "String"
+            "type": "string"
         }
     },
-    "variables": {},
+    "variables": {
+        "uniqueStorageName": "[concat(parameters('storageAccounts_storagePrefix'), uniqueString(resourceGroup().id))]",
+        "cognitiveServicesAccountName": "[concat(parameters('accounts_cogPrefix'), uniqueString(resourceGroup().id))]",
+        "uniqueKeyVaultName": "[concat(parameters('vaults_speechsecrets_prefix'), uniqueString(resourceGroup().id), '-kv')]"
+    },
     "resources": [
         {
             "type": "Microsoft.CognitiveServices/accounts",
             "apiVersion": "2017-04-18",
-            "name": "[parameters('accounts_jjspeech2_name')]",
+            "name": "[variables('cognitiveServicesAccountName')]",
             "location": "westeurope",
             "sku": {
                 "name": "S0"
@@ -74,7 +86,7 @@
         {
             "type": "Microsoft.KeyVault/vaults",
             "apiVersion": "2016-10-01",
-            "name": "[parameters('vaults_speechsecrets_name')]",
+            "name": "[variables('uniqueKeyVaultName')]",
             "location": "westeurope",
             "properties": {
                 "sku": {
@@ -135,7 +147,7 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2019-04-01",
-            "name": "[parameters('storageAccounts_jjspeechsa_name')]",
+            "name": "[variables('uniqueStorageName')]",
             "location": "westeurope",
             "sku": {
                 "name": "Standard_RAGRS",
@@ -206,12 +218,13 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "2016-10-01",
-            "name": "[concat(parameters('vaults_speechsecrets_name'), '/cognitive-account')]",
+            "name": "[concat(variables('uniqueKeyVaultName'), '/cognitive-account')]",
             "location": "westeurope",
             "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_speechsecrets_name'))]"
+                "[resourceId('Microsoft.KeyVault/vaults', variables('uniqueKeyVaultName'))]"
             ],
             "properties": {
+                "value": "test",
                 "attributes": {
                     "enabled": true
                 }
@@ -220,12 +233,13 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "2016-10-01",
-            "name": "[concat(parameters('vaults_speechsecrets_name'), '/cognitive-key')]",
+            "name": "[concat(variables('uniqueKeyVaultName'), '/cognitive-key')]",
             "location": "westeurope",
             "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_speechsecrets_name'))]"
+                "[resourceId('Microsoft.KeyVault/vaults', variables('uniqueKeyVaultName'))]"
             ],
             "properties": {
+                "value": "test",
                 "attributes": {
                     "enabled": true
                 }
@@ -234,12 +248,13 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "2016-10-01",
-            "name": "[concat(parameters('vaults_speechsecrets_name'), '/input-sas')]",
+            "name": "[concat(variables('uniqueKeyVaultName'), '/input-sas')]",
             "location": "westeurope",
             "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_speechsecrets_name'))]"
+                "[resourceId('Microsoft.KeyVault/vaults', variables('uniqueKeyVaultName'))]"
             ],
             "properties": {
+                "value": "test",
                 "attributes": {
                     "enabled": true
                 }
@@ -248,12 +263,13 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "2016-10-01",
-            "name": "[concat(parameters('vaults_speechsecrets_name'), '/storage-account')]",
+            "name": "[concat(variables('uniqueKeyVaultName'), '/storage-account')]",
             "location": "westeurope",
             "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_speechsecrets_name'))]"
+                "[resourceId('Microsoft.KeyVault/vaults', variables('uniqueKeyVaultName'))]"
             ],
             "properties": {
+                "value": "test",
                 "attributes": {
                     "enabled": true
                 }
@@ -262,9 +278,9 @@
         {
             "type": "Microsoft.Storage/storageAccounts/blobServices",
             "apiVersion": "2019-04-01",
-            "name": "[concat(parameters('storageAccounts_jjspeechsa_name'), '/default')]",
+            "name": "[concat(variables('uniqueStorageName'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_jjspeechsa_name'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageName'))]"
             ],
             "properties": {
                 "cors": {
@@ -722,10 +738,10 @@
         {
             "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
             "apiVersion": "2019-04-01",
-            "name": "[concat(parameters('storageAccounts_jjspeechsa_name'), '/default/input')]",
+            "name": "[concat(variables('uniqueStorageName'), '/default/input')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_jjspeechsa_name'), 'default')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_jjspeechsa_name'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('uniqueStorageName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageName'))]"
             ],
             "properties": {
                 "publicAccess": "None"
@@ -734,10 +750,10 @@
         {
             "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
             "apiVersion": "2019-04-01",
-            "name": "[concat(parameters('storageAccounts_jjspeechsa_name'), '/default/output')]",
+            "name": "[concat(variables('uniqueStorageName'), '/default/output')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_jjspeechsa_name'), 'default')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_jjspeechsa_name'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('uniqueStorageName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageName'))]"
             ],
             "properties": {
                 "publicAccess": "None"
