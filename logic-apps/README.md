@@ -19,6 +19,21 @@ An ARM template can be found [here](https://github.com/jometzg/cognitive-speech/
 This demonstration makes use of emails as a means of receiving MP3 recordings and for sending the reply with the transcription text. It therefore needs an email account for this. You can either use an existing account or create a new one with Outlook.com or with Gmail.
 Some care needs to be taken with this account as sometimes the email provider sees this automation as a sign that the email account is in some way compromised. Please check this account to see if the account provider wants further verification. If this is the case, whilst this is happening the emails will become blocked.
 
+## Storage account shared access signature (SAS)
+The Cognitive Services batch API requires a URL to the MP3 audio recording. This is in blob storage. The API cannot use the blob storage keays, so a URL needs to be constructed that allows access to the MP3 file which in this demonstration will be in the *input* blob container. There are three choices:
+1. Make the container public - this is not a good idea for potentially private recordings
+2. Create a SAS for the blob - this has a coding overhead for each blob
+3. Create a SAS for the input container, which will be common to all blobs in the container. This was chosen
+
+Azure Storage Explorer is the simplest means. There is now a version of this in the Azure Portal
+
+The Azure CLI may also be used [here](https://docs.microsoft.com/en-us/cli/azure/storage/container?view=azure-cli-latest#az-storage-container-generate-sas).
+```
+end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+sas=`az storage container generate-sas -n MyContainer --account-name MyStorageAccount --https-only --permissions dlrw --expiry $end -o tsv`
+az storage blob upload -n MyBlob -c MyContainer --account-name MyStorageAccount -f file.txt --sas-token $sas
+```
+
 ## Key vault secrets
 The ARM template builds the infrastructure, but for this demonstration to work, there must be four key vault secrets of the correct name and these need to be populated after they have been created:
 1. cognitive-account - needs to contain the URL to the Cogntivce Services batch API. For West Europe accounts, this is *https://westeurope.cris.ai*
