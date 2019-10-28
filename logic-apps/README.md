@@ -28,7 +28,7 @@ The Cognitive Services batch API requires a URL to the MP3 audio recording. This
 Azure Storage Explorer is the simplest means. 
 ![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/generate-sas.png "Azure Storage Explorer")
 ![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/generate-sas-dialog.png "Azure Storage Explorer SAS create")
-![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/generate-sas-response.png "Azure Storage Explorer SAS copy")
+![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/generate-sas-reponse.png "Azure Storage Explorer SAS copy")
 
 The Azure CLI may also be used [here](https://docs.microsoft.com/en-us/cli/azure/storage/container?view=azure-cli-latest#az-storage-container-generate-sas).
 ```
@@ -124,4 +124,37 @@ As can be seen above, a step may be opened and its values inspected.
 
 
 ## Troubleshooting
+The demonstration has quite a few moving parts. The first port of call for any debugging is the run history of each logic app.
 
+### No email triggers arriving
+Check the email account you have used, looking in the inbox to see if the email provider wants more verification. This can happen the first time Emails are using in Logic Apps. Also, check that the email trigger has been correctly authorised. This will be necessary the first time the logic app is created. Then make sure that you are sendin the requests to this email address.
+
+### Email triggers arriving, but HTTP error in receive-email
+Check the secrets in the key vault are correct for your Cognitive Speech account. Also check you have the right sort of Cognitive account - that can do speech transcription.
+
+### Email triggers and success, but no webhook Logic App callback
+This is usually because the webhook for the batch API has not been set to point to the HTTP URL of the *webhook* logic app. Open up the HTTP receive of the logic app and copy its (auto-generated) URL and make sure that this was the URL that was used in the request to setup the webhook. As a reminder, this is a one-only call to the batch API to set the webhook:
+'''
+POST /api/speechtotext/v2.1/transcriptions/hooks HTTP/1.1
+Host: <region>.cris.ai
+Content-Type: application/json
+Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
+
+{
+  "configuration": {
+    "url": "< URL of webhook. For a logic app, this can be copied from the HTTP trigger step >",
+    "secret": "<my_secret>"
+  },
+  "events": [
+    "TranscriptionCompletion"
+  ],
+  "active": true,
+  "name": "TranscriptionCompletionWebHook",
+  "description": "This is a Webhook created to trigger an HTTP POST request when my audio file transcription is completed.",
+  "properties": {
+      "Active" : "True"
+  }
+
+}
+}
+'''
