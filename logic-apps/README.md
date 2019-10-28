@@ -124,7 +124,7 @@ As can be seen above, a step may be opened and its values inspected.
 
 
 ## Troubleshooting
-The demonstration has quite a few moving parts. The first port of call for any debugging is the run history of each logic app.
+The demonstration has quite a few moving parts. The first port of call for any debugging is the run history of each logic app. The following are some scenarios that I have found before:
 
 ### No email triggers arriving
 Check the email account you have used, looking in the inbox to see if the email provider wants more verification. This can happen the first time Emails are using in Logic Apps. Also, check that the email trigger has been correctly authorised. This will be necessary the first time the logic app is created. Then make sure that you are sendin the requests to this email address.
@@ -134,12 +134,12 @@ Check the secrets in the key vault are correct for your Cognitive Speech account
 
 ### Email triggers and success, but no webhook Logic App callback
 This is usually because the webhook for the batch API has not been set to point to the HTTP URL of the *webhook* logic app. Open up the HTTP receive of the logic app and copy its (auto-generated) URL and make sure that this was the URL that was used in the request to setup the webhook. As a reminder, this is a one-only call to the batch API to set the webhook:
-'''
+
+```
 POST /api/speechtotext/v2.1/transcriptions/hooks HTTP/1.1
 Host: <region>.cris.ai
 Content-Type: application/json
 Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
-
 {
   "configuration": {
     "url": "< URL of webhook. For a logic app, this can be copied from the HTTP trigger step >",
@@ -157,4 +157,13 @@ Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
 
 }
 }
-'''
+```
+
+### Other things to check
+1. The key vault has the correct values in its four secrets
+2. You are sending an email with the subject line of "audio" - in this exact case
+3. You are sending MP3 files
+4. Look closely at the run history, do the URLs look correct?
+5. Look in the blob storage *input* and *output* containers, do the values look right?
+6. Look at the contents of the blob _mp3name.mp3.ret.txt_ - does it contain the return email address?
+7. Look in the contents of the blob _mp3name.mp3.txt_ - does it contain the text of the transcription?
