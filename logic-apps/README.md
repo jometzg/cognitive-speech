@@ -16,12 +16,21 @@ These can be built in the portal, CLI or ARM/Terraform.
 An ARM template can be found [here](https://github.com/jometzg/cognitive-speech/blob/master/templates/template.json)
 
 ## Email account
-This demonstration makes use of emails as a means of receiving MP3 resordings and for sending the reply with the transcription text. It therefore needs an email account for this. You can either use an existing account or create a new one with Outlook.com or with Gmail.
+This demonstration makes use of emails as a means of receiving MP3 recordings and for sending the reply with the transcription text. It therefore needs an email account for this. You can either use an existing account or create a new one with Outlook.com or with Gmail.
 Some care needs to be taken with this account as sometimes the email provider sees this automation as a sign that the email account is in some way compromised. Please check this account to see if the account provider wants further verification. If this is the case, whilst this is happening the emails will become blocked.
+
+## Key vault secrets
+The ARM template builds the infrastructure, but for this demonstration to work, there must be four key vault secrets of the correct name and these need to be populated after they have been created:
+1. cognitive-account - needs to contain the URL to the Cogntivce Services batch API. For West Europe accounts, this is *https://westeurope.cris.ai*
+2. cognitive-key - this is the key that was created when the Cognitive account was created
+3. input-sas - this is a shared access signature of the *input* container of the blob storage account. This needs to be created in the Azure CLI or using the Azure Storage Explorer
+4. storage-account - this needs to be the URL to the storage account e.g. *https://storageaccount.blob.core.windows.net* and is used to construct the blob URL alongside the blob name and the SAS for the batch REST call.
+
+Just to be clear, only 2 of these are actual secrets, the other 2 being configuration. I thought it best to put all of this configuration in a single place. For production, there may be other means, such as injecting these values in a DevOps pipeline deployment.
 
 ## Setting up the webhook
 Batch transcription of MP3 files can take minutes. Instead of waiting for the reults, it is much more efficient to use webhooks.
-To use webhooks, the webhook needs to be registered with the batch transcription API. This is covered [here](https://github.com/jometzg/cognitive-speech/blob/master/REST%20API/Using%20transcription%20REST%20API.md).
+**This demonstration requires webhooks, so the webhook needs to be registered with the batch transcription API.** This is covered [here](https://github.com/jometzg/cognitive-speech/blob/master/REST%20API/Using%20transcription%20REST%20API.md).
 
 The webhook itself needs to point to the second logic app's HTTP trigger endpoint. This can be found by clicking on the "webhook" logic app's HTTP trigger step to reveal the URL. It should be noted that this URL is auto-generated on logic app creation and so will differ on each implementation. Below shows the URL in the logic app designer:
 
@@ -59,7 +68,7 @@ The completed [code view](https://github.com/jometzg/cognitive-speech/blob/maste
 ## Webhook logic app
 
 ![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/webhook-email.png "webhook logic app flow")
-This logic app is called by the Cognitive services batch transcription API when a transcription has completed. For this logic app to be called, this logic app's HTTP trigger endpoint *must* be registered as a webhook. This has been covered in more detail earlier.
+This logic app is called by the Cognitive services batch transcription API when a transcription has completed. For this logic app to be called, **this logic app's HTTP trigger endpoint must be registered as a webhook**. This has been covered in more detail [here](https://github.com/jometzg/cognitive-speech/blob/master/REST%20API/Using%20transcription%20REST%20API.md).
 
 **It should be noted that the webhook may contain more than one result, but for the purposes of the demonstration we are only interested in the first result returned. So there are several places in the returned JSON that are array results. We will always be picking the zero element [0] of these arrays. For production code, this may be different**
 
@@ -94,3 +103,7 @@ As can be seen above, a step may be opened and its values inspected.
 
 3. Postman to generate HTTP requests.
 4. Check the email account to see what has been sent and what has been received
+
+
+## Troubleshooting
+
