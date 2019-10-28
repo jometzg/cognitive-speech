@@ -25,7 +25,10 @@ The Cognitive Services batch API requires a URL to the MP3 audio recording. This
 2. Create a SAS for the blob - this has a coding overhead for each blob
 3. Create a SAS for the input container, which will be common to all blobs in the container. This was chosen
 
-Azure Storage Explorer is the simplest means. There is now a version of this in the Azure Portal
+Azure Storage Explorer is the simplest means. 
+![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/generate-sas.png "Azure Storage Explorer")
+![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/generate-sas-dialog.png "Azure Storage Explorer SAS create")
+![alt text](https://github.com/jometzg/cognitive-speech/blob/master/logic-apps/generate-sas-response.png "Azure Storage Explorer SAS copy")
 
 The Azure CLI may also be used [here](https://docs.microsoft.com/en-us/cli/azure/storage/container?view=azure-cli-latest#az-storage-container-generate-sas).
 ```
