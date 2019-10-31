@@ -10,7 +10,7 @@ This demonstation is a stand-alone one which uses cognitive services speech reco
 
 More detail on the demonstration can be found here [demonstration flow](https://github.com/jometzg/cognitive-speech/blob/master/demo-flow/README.md)
 
-This demonstration makes use of the Azure Cognitive Services Speech Service - specifically the batch transcription REST API. This is quite a simple set of REST APIs that allow you to do audio transcription and sentiment analysis. Here is a quick [summary](https://github.com/jometzg/cognitive-speech/blob/master/REST%20API/README.md).
+This demonstration makes use of the Azure Cognitive Services Speech Service - specifically the batch transcription REST API. This is quite a simple set of REST APIs that allow you to do audio transcription and sentiment analysis. Here is a quick [summary](https://github.com/jometzg/cognitive-speech/blob/master/REST%20API/README.MD).
 
 # Getting Started
 This demonstration requires access to an Azure subscription. If you don't have an Azure subscription, a trial one can be created here https://azure.microsoft.com/en-gb/free/
