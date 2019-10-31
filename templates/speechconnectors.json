@@ -1,0 +1,64 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "connections_azureblob_name": {
+      "defaultValue": "azureblob",
+      "type": "String"
+    },
+    "connections_outlook_1_name": {
+      "defaultValue": "outlook-1",
+      "type": "String"
+    },
+    "connections_keyvault_1_name": {
+      "defaultValue": "keyvault-1",
+      "type": "String"
+    },
+	"location": {
+        "type": "string",
+        "defaultValue": "westeurope"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[parameters('connections_azureblob_name')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "jjspeechsa",
+        "customParameterValues": {},
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/',[parameters('location')],'/managedApis/', parameters('connections_azureblob_name'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[parameters('connections_keyvault_1_name')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "jometzg@microsoft.com",
+        "customParameterValues": {},
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/',[parameters('location')],'/managedApis/keyvault')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[parameters('connections_outlook_1_name')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "mrmetron@outlook.com",
+        "customParameterValues": {},
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', [parameters('location')], '/managedApis/outlook')]"
+        }
+      }
+    }
+  ]
+}

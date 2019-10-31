@@ -1,0 +1,744 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workflows_webhook_name": {
+      "defaultValue": "webhook",
+      "type": "String"
+    },
+    "workflows_receive_email_name": {
+      "defaultValue": "receive-email",
+      "type": "String"
+    },
+    "connections_azureblob_externalid": {
+      "defaultValue": "[concat(resourceGroup().id, '/providers/Microsoft.Web/connections/azureblob')]",
+      "type": "String"
+    },
+    "connections_keyvault_1_externalid": {
+      "defaultValue": "[concat(resourceGroup().id, '/providers/Microsoft.Web/connections/keyvault-1')]",
+      "type": "String"
+    },
+    "connections_outlook_1_externalid": {
+      "defaultValue": "[concat(resourceGroup().id, '/providers/Microsoft.Web/connections/outlook-1')]",
+      "type": "String"
+    },
+	"location": {
+        "type": "string",
+        "defaultValue": "westeurope"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "[parameters('workflows_receive_email_name')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "When_a_new_email_arrives": {
+              "recurrence": {
+                "frequency": "Minute",
+                "interval": 3
+              },
+              "splitOn": "@triggerBody()?['value']",
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['outlook']['connectionId']"
+                  }
+                },
+                "method": "get",
+                "path": "/Mail/OnNewEmail",
+                "queries": {
+                  "fetchOnlyWithAttachment": true,
+                  "folderPath": "Inbox",
+                  "importance": "Any",
+                  "includeAttachments": true
+                }
+              }
+            }
+          },
+          "actions": {
+            "Get_cognitive-account": {
+              "runAfter": {},
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['keyvault_1']['connectionId']"
+                  }
+                },
+                "method": "get",
+                "path": "/secrets/@{encodeURIComponent('cognitive-account')}/value"
+              }
+            },
+            "Get_storage-account": {
+              "runAfter": {
+                "congitive-secret": [
+                  "Succeeded"
+                ]
+              },
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['keyvault_1']['connectionId']"
+                  }
+                },
+                "method": "get",
+                "path": "/secrets/@{encodeURIComponent('storage-account')}/value"
+              }
+            },
+            "If_email_subject_is_\"audio\"": {
+              "actions": {
+                "For_each": {
+                  "foreach": "@triggerBody()?['Attachments']",
+                  "actions": {
+                    "Call_batch_REST_API": {
+                      "runAfter": {
+                        "Create_return_address_blob": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Http",
+                      "inputs": {
+                        "body": {
+                          "description": "<optional description of the transcription>",
+                          "locale": "en-US",
+                          "models": [],
+                          "name": "@{items('For_each')?['Name']}",
+                          "properties": {
+                            "AddSentiment": "True",
+                            "AddWordLevelTimestamps": "True",
+                            "ProfanityFilterMode": "Masked",
+                            "PunctuationMode": "DictatedAndAutomatic"
+                          },
+                          "recordingsUrls": [
+                            "@{body('Get_storage-account')?['value']}/input/@{encodeUriComponent(items('For_each')?['Name'])}@{body('input-sas')?['value']}"
+                          ]
+                        },
+                        "headers": {
+                          "Ocp-Apim-Subscription-Key": "@body('congitive-secret')?['value']"
+                        },
+                        "method": "POST",
+                        "uri": "@{body('Get_cognitive-account')?['value']}/api/speechtotext/v2.1/transcriptions"
+                      }
+                    },
+                    "Create_MP3_blob": {
+                      "runAfter": {},
+                      "type": "ApiConnection",
+                      "inputs": {
+                        "body": "@base64ToBinary(items('For_each')?['ContentBytes'])",
+                        "host": {
+                          "connection": {
+                            "name": "@parameters('$connections')['azureblob']['connectionId']"
+                          }
+                        },
+                        "method": "post",
+                        "path": "/datasets/default/files",
+                        "queries": {
+                          "folderPath": "/input",
+                          "name": "@items('For_each')?['Name']",
+                          "queryParametersSingleEncoded": true
+                        }
+                      },
+                      "runtimeConfiguration": {
+                        "contentTransfer": {
+                          "transferMode": "Chunked"
+                        }
+                      }
+                    },
+                    "Create_return_address_blob": {
+                      "runAfter": {
+                        "Create_MP3_blob": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "ApiConnection",
+                      "inputs": {
+                        "body": "@triggerBody()?['From']",
+                        "host": {
+                          "connection": {
+                            "name": "@parameters('$connections')['azureblob']['connectionId']"
+                          }
+                        },
+                        "method": "post",
+                        "path": "/datasets/default/files",
+                        "queries": {
+                          "folderPath": "/output",
+                          "name": "@{items('For_each')?['Name']}.return.txt",
+                          "queryParametersSingleEncoded": true
+                        }
+                      },
+                      "runtimeConfiguration": {
+                        "contentTransfer": {
+                          "transferMode": "Chunked"
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {},
+                  "type": "Foreach",
+                  "description": "for each attachment"
+                }
+              },
+              "runAfter": {
+                "input-sas": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@triggerBody()?['Subject']",
+                      "audio"
+                    ]
+                  }
+                ]
+              },
+              "type": "If"
+            },
+            "congitive-secret": {
+              "runAfter": {
+                "Get_cognitive-account": [
+                  "Succeeded"
+                ]
+              },
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['keyvault_1']['connectionId']"
+                  }
+                },
+                "method": "get",
+                "path": "/secrets/@{encodeURIComponent('cognitive-key')}/value"
+              }
+            },
+            "input-sas": {
+              "runAfter": {
+                "Get_storage-account": [
+                  "Succeeded"
+                ]
+              },
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['keyvault_1']['connectionId']"
+                  }
+                },
+                "method": "get",
+                "path": "/secrets/@{encodeURIComponent('input-sas')}/value"
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azureblob": {
+                "connectionId": "[parameters('connections_azureblob_externalid')]",
+                "connectionName": "azureblob",
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azureblob')]"
+              },
+              "keyvault_1": {
+                "connectionId": "[parameters('connections_keyvault_1_externalid')]",
+                "connectionName": "keyvault-1",
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/keyvault')]"
+              },
+              "outlook": {
+                "connectionId": "[parameters('connections_outlook_1_externalid')]",
+                "connectionName": "outlook-1",
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/outlook')]"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "[parameters('workflows_webhook_name')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "manual": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {
+                  "properties": {
+                    "createdDateTime": {
+                      "type": "string"
+                    },
+                    "datasets": {
+                      "type": "array"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "lastActionDateTime": {
+                      "type": "string"
+                    },
+                    "locale": {
+                      "type": "string"
+                    },
+                    "models": {
+                      "items": {
+                        "properties": {
+                          "createdDateTime": {
+                            "type": "string"
+                          },
+                          "datasets": {
+                            "type": "array"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "lastActionDateTime": {
+                            "type": "string"
+                          },
+                          "locale": {
+                            "type": "string"
+                          },
+                          "modelKind": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "properties": {
+                            "properties": {
+                              "ModelClass": {
+                                "type": "string"
+                              },
+                              "Purpose": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "modelKind",
+                          "datasets",
+                          "id",
+                          "createdDateTime",
+                          "lastActionDateTime",
+                          "status",
+                          "locale",
+                          "name",
+                          "description",
+                          "properties"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "properties": {
+                      "properties": {
+                        "AddSentiment": {
+                          "type": "string"
+                        },
+                        "CustomPronunciation": {
+                          "type": "string"
+                        },
+                        "Duration": {
+                          "type": "string"
+                        },
+                        "ProfanityFilterMode": {
+                          "type": "string"
+                        },
+                        "PunctuationMode": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "reportFileUrl": {
+                      "type": "string"
+                    },
+                    "results": {
+                      "items": {
+                        "properties": {
+                          "recordingsUrl": {
+                            "type": "string"
+                          },
+                          "resultUrls": {
+                            "items": {
+                              "properties": {
+                                "fileName": {
+                                  "type": "string"
+                                },
+                                "resultUrl": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "fileName",
+                                "resultUrl"
+                              ],
+                              "type": "object"
+                            },
+                            "type": "array"
+                          }
+                        },
+                        "required": [
+                          "recordingsUrl",
+                          "resultUrls"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "statusMessage": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "actions": {
+            "If_status_is_\"Succeeded\"": {
+              "actions": {
+                "Create_transcription_blob": {
+                  "runAfter": {
+                    "Parse_JSON": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "body": "@body('Parse_JSON')?['AudioFileResults'][0].CombinedResults[0].Display",
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azureblob']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "path": "/datasets/default/files",
+                    "queries": {
+                      "folderPath": "/output",
+                      "name": "@{triggerBody()?['name']}.trans.txt",
+                      "queryParametersSingleEncoded": true
+                    }
+                  },
+                  "runtimeConfiguration": {
+                    "contentTransfer": {
+                      "transferMode": "Chunked"
+                    }
+                  }
+                },
+                "Get_return_address_blob_content": {
+                  "runAfter": {
+                    "Create_transcription_blob": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azureblob']['connectionId']"
+                      }
+                    },
+                    "method": "get",
+                    "path": "/datasets/default/files/@{encodeURIComponent(encodeURIComponent('/output/',triggerBody()?['name'],'.return.txt'))}/content",
+                    "queries": {
+                      "inferContentType": true
+                    }
+                  }
+                },
+                "HTTP": {
+                  "runAfter": {},
+                  "type": "Http",
+                  "inputs": {
+                    "method": "GET",
+                    "uri": "@{triggerBody()?['results'][0].resultUrls[0].resultUrl}"
+                  }
+                },
+                "Parse_JSON": {
+                  "runAfter": {
+                    "HTTP": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('HTTP')",
+                    "schema": {
+                      "properties": {
+                        "AudioFileResults": {
+                          "items": {
+                            "properties": {
+                              "AudioFileName": {
+                                "type": "string"
+                              },
+                              "AudioFileUrl": {
+                                "type": "string"
+                              },
+                              "AudioLengthInSeconds": {
+                                "type": "number"
+                              },
+                              "CombinedResults": {
+                                "items": {
+                                  "properties": {
+                                    "ChannelNumber": {
+                                      "type": "string"
+                                    },
+                                    "Display": {
+                                      "type": "string"
+                                    },
+                                    "ITN": {
+                                      "type": "string"
+                                    },
+                                    "Lexical": {
+                                      "type": "string"
+                                    },
+                                    "MaskedITN": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "ChannelNumber",
+                                    "Lexical",
+                                    "ITN",
+                                    "MaskedITN",
+                                    "Display"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "SegmentResults": {
+                                "items": {
+                                  "properties": {
+                                    "ChannelNumber": {
+                                      "type": "string"
+                                    },
+                                    "Duration": {
+                                      "type": "integer"
+                                    },
+                                    "DurationInSeconds": {
+                                      "type": "number"
+                                    },
+                                    "NBest": {
+                                      "items": {
+                                        "properties": {
+                                          "Confidence": {
+                                            "type": "number"
+                                          },
+                                          "Display": {
+                                            "type": "string"
+                                          },
+                                          "ITN": {
+                                            "type": "string"
+                                          },
+                                          "Lexical": {
+                                            "type": "string"
+                                          },
+                                          "MaskedITN": {
+                                            "type": "string"
+                                          },
+                                          "Sentiment": {
+                                            "properties": {
+                                              "Negative": {
+                                                "type": "number"
+                                              },
+                                              "Neutral": {
+                                                "type": "number"
+                                              },
+                                              "Positive": {
+                                                "type": "number"
+                                              }
+                                            },
+                                            "type": "object"
+                                          },
+                                          "Words": {
+                                            "items": {
+                                              "properties": {
+                                                "Duration": {
+                                                  "type": "integer"
+                                                },
+                                                "DurationInSeconds": {
+                                                  "type": "number"
+                                                },
+                                                "Offset": {
+                                                  "type": "integer"
+                                                },
+                                                "OffsetInSeconds": {
+                                                  "type": "number"
+                                                },
+                                                "Word": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "Word",
+                                                "Offset",
+                                                "Duration",
+                                                "OffsetInSeconds",
+                                                "DurationInSeconds"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "type": "array"
+                                          }
+                                        },
+                                        "required": [
+                                          "Confidence",
+                                          "Lexical",
+                                          "ITN",
+                                          "MaskedITN",
+                                          "Display",
+                                          "Sentiment",
+                                          "Words"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "Offset": {
+                                      "type": "integer"
+                                    },
+                                    "OffsetInSeconds": {
+                                      "type": "number"
+                                    },
+                                    "RecognitionStatus": {
+                                      "type": "string"
+                                    },
+                                    "SpeakerId": {}
+                                  },
+                                  "required": [
+                                    "RecognitionStatus",
+                                    "ChannelNumber",
+                                    "SpeakerId",
+                                    "Offset",
+                                    "Duration",
+                                    "OffsetInSeconds",
+                                    "DurationInSeconds",
+                                    "NBest"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "required": [
+                              "AudioFileName",
+                              "AudioFileUrl",
+                              "AudioLengthInSeconds",
+                              "CombinedResults",
+                              "SegmentResults"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "Send_an_email": {
+                  "runAfter": {
+                    "Get_return_address_blob_content": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "body": {
+                      "Body": "@{body('Parse_JSON')?['AudioFileResults'][0].CombinedResults[0].Display}",
+                      "Subject": "Your transcription",
+                      "To": "@body('Get_return_address_blob_content')"
+                    },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['outlook']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "path": "/Mail"
+                  }
+                }
+              },
+              "runAfter": {},
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@triggerBody()?['status']",
+                      "Succeeded"
+                    ]
+                  }
+                ]
+              },
+              "type": "If"
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azureblob": {
+                "connectionId": "[parameters('connections_azureblob_externalid')]",
+                "connectionName": "azureblob",
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azureblob')]"
+              },
+              "outlook": {
+                "connectionId": "[parameters('connections_outlook_1_externalid')]",
+                "connectionName": "outlook-1",
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/outlook')]"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
