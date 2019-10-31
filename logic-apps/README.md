@@ -13,7 +13,7 @@ The infrastructure comprises:
 
 These can be built in the portal, CLI or ARM/Terraform. 
 
-The quickest approach wil be to manually build the key vault, storage account and Cognitive Services account and then to follow the [instructions here](templates/README.MD) to create the logic apps and their API connectors.
+The quickest approach wil be to manually build the key vault, storage account and Cognitive Services account and then to follow the [instructions here](https://github.com/jometzg/cognitive-speech/blob/master/templates/README.MD) to create the logic apps and their API connectors.
 
 ## Email account
 This demonstration makes use of emails as a means of receiving MP3 recordings and for sending the reply with the transcription text. It therefore needs an email account for this. You can either use an existing account or create a new one with Outlook.com or with Gmail.
