@@ -1,0 +1,263 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"vaults_speechsecrets_name": {
+			"defaultValue": "speechsecretsjj",
+			"type": "String"
+		},
+		"storageAccounts_jjspeechsa_name": {
+			"defaultValue": "jjspeechsajj",
+			"type": "String"
+		},
+		"accounts_jjspeech2_name": {
+			"defaultValue": "jjspeech2jj",
+			"type": "String"
+		},
+		"cognitive-account": {
+			"defaultValue": "xxx-account-url-xxxxxx",
+			"type": "String"
+		},
+		"cognitive-key": {
+			"defaultValue": "xxxx-cognitive-key-xxxxxxxxxx",
+			"type": "String"
+		},
+		"input-sas": {
+			"defaultValue": "xxxx-input-sas-xxxxxx",
+			"type": "String"
+		},
+		"storage-account": {
+			"defaultValue": "xxxxx-storage-account-url-xxxxxxx",
+			"type": "String"
+		},
+		"objectId": {
+			"defaultValue": "xxxx- needs-to-be-objectId-of portal-admin-xxxxxxx",
+			"type": "String"
+		},
+		"keysPermissions": {
+			"type": "array",
+			"defaultValue": [
+				"list"
+			],
+			"metadata": {
+				"description": "Specifies the permissions to keys in the vault. Valid values are: all, encrypt, decrypt, wrapKey, unwrapKey, sign, verify, get, list, create, update, import, delete, backup, restore, recover, and purge."
+			}
+		},
+		"secretsPermissions": {
+			"type": "array",
+			"defaultValue": [
+				"list"
+			],
+			"metadata": {
+				"description": "Specifies the permissions to secrets in the vault. Valid values are: all, get, list, set, delete, backup, restore, recover, and purge."
+			}
+		}
+	},
+	"variables": {},
+	"resources": [
+		{
+			"type": "Microsoft.CognitiveServices/accounts",
+			"apiVersion": "2017-04-18",
+			"name": "[parameters('accounts_jjspeech2_name')]",
+			"location": "[resourceGroup().location]",
+			"sku": {
+				"name": "S0"
+			},
+			"kind": "SpeechServices",
+			"properties": {}
+		},
+		{
+			"type": "Microsoft.KeyVault/vaults",
+			"apiVersion": "2016-10-01",
+			"name": "[parameters('vaults_speechsecrets_name')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"sku": {
+					"family": "A",
+					"name": "Standard"
+				},
+				"tenantId": "[subscription().tenantId]",
+				"accessPolicies": [
+					{
+						"objectId": "[parameters('objectId')]",
+						"tenantId": "[subscription().tenantId]",
+						"permissions": {
+							"keys": [
+								"Get",
+								"List",
+								"Update",
+								"Create",
+								"Import",
+								"Delete",
+								"Recover",
+								"Backup",
+								"Restore"
+							],
+							"secrets": [
+								"Get",
+								"List",
+								"Set",
+								"Delete",
+								"Recover",
+								"Backup",
+								"Restore"
+							],
+							"certificates": [
+								"Get",
+								"List",
+								"Update",
+								"Create",
+								"Import",
+								"Delete",
+								"Recover",
+								"Backup",
+								"Restore",
+								"ManageContacts",
+								"ManageIssuers",
+								"GetIssuers",
+								"ListIssuers",
+								"SetIssuers",
+								"DeleteIssuers"
+							]
+						}
+					}
+				],
+				"enabledForDeployment": false,
+				"enabledForDiskEncryption": false,
+				"enabledForTemplateDeployment": false
+			}
+		},
+		{
+			"type": "Microsoft.Storage/storageAccounts",
+			"apiVersion": "2019-04-01",
+			"name": "[parameters('storageAccounts_jjspeechsa_name')]",
+			"location": "[resourceGroup().location]",
+			"sku": {
+				"name": "Standard_RAGRS",
+				"tier": "Standard"
+			},
+			"kind": "StorageV2",
+			"properties": {
+				"networkAcls": {
+					"bypass": "AzureServices",
+					"virtualNetworkRules": [],
+					"ipRules": [],
+					"defaultAction": "Allow"
+				},
+				"supportsHttpsTrafficOnly": true,
+				"encryption": {
+					"services": {
+						"file": {
+							"enabled": true
+						},
+						"blob": {
+							"enabled": true
+						}
+					},
+					"keySource": "Microsoft.Storage"
+				},
+				"accessTier": "Hot"
+			}
+		},
+		{
+			"type": "Microsoft.KeyVault/vaults/secrets",
+			"apiVersion": "2016-10-01",
+			"name": "[concat(parameters('vaults_speechsecrets_name'), '/cognitive-account')]",
+			"location": "[resourceGroup().location]",
+			"dependsOn": [
+				"[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_speechsecrets_name'))]"
+			],
+			"properties": {
+				"attributes": {
+					"enabled": true
+				},
+				"value": "[parameters('cognitive-account')]"
+			}
+		},
+		{
+			"type": "Microsoft.KeyVault/vaults/secrets",
+			"apiVersion": "2016-10-01",
+			"name": "[concat(parameters('vaults_speechsecrets_name'), '/cognitive-key')]",
+			"location": "[resourceGroup().location]",
+			"dependsOn": [
+				"[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_speechsecrets_name'))]"
+			],
+			"properties": {
+				"attributes": {
+					"enabled": true
+				},
+				"value": "[parameters('cognitive-key')]"
+			}
+		},
+		{
+			"type": "Microsoft.KeyVault/vaults/secrets",
+			"apiVersion": "2016-10-01",
+			"name": "[concat(parameters('vaults_speechsecrets_name'), '/input-sas')]",
+			"location": "[resourceGroup().location]",
+			"dependsOn": [
+				"[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_speechsecrets_name'))]"
+			],
+			"properties": {
+				"attributes": {
+					"enabled": true
+				},
+				"value": "[parameters('input-sas')]"
+			}
+		},
+		{
+			"type": "Microsoft.KeyVault/vaults/secrets",
+			"apiVersion": "2016-10-01",
+			"name": "[concat(parameters('vaults_speechsecrets_name'), '/storage-account')]",
+			"location": "[resourceGroup().location]",
+			"dependsOn": [
+				"[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_speechsecrets_name'))]"
+			],
+			"properties": {
+				"attributes": {
+					"enabled": true
+				},
+				"value": "[parameters('storage-account')]"
+			}
+		},
+		{
+			"type": "Microsoft.Storage/storageAccounts/blobServices",
+			"apiVersion": "2019-04-01",
+			"name": "[concat(parameters('storageAccounts_jjspeechsa_name'), '/default')]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_jjspeechsa_name'))]"
+			],
+			"properties": {
+				"cors": {
+					"corsRules": []
+				},
+				"deleteRetentionPolicy": {
+					"enabled": false
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+			"apiVersion": "2019-04-01",
+			"name": "[concat(parameters('storageAccounts_jjspeechsa_name'), '/default/input')]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_jjspeechsa_name'), 'default')]",
+				"[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_jjspeechsa_name'))]"
+			],
+			"properties": {
+				"publicAccess": "None"
+			}
+		},
+		{
+			"type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+			"apiVersion": "2019-04-01",
+			"name": "[concat(parameters('storageAccounts_jjspeechsa_name'), '/default/output')]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_jjspeechsa_name'), 'default')]",
+				"[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_jjspeechsa_name'))]"
+			],
+			"properties": {
+				"publicAccess": "None"
+			}
+		}
+	]
+}
