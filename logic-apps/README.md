@@ -13,11 +13,7 @@ The infrastructure comprises:
 
 These can be built in the portal, CLI or ARM/Terraform. 
 
-An ARM template can be found [here](https://github.com/jometzg/cognitive-speech/blob/master/templates/template.json)
-
-**The logic apps use API Connections. These need to be tied to your instances of storage account, key vault and Outlook.com connection. Even when built from the ARM template, you will need to go into the logic app designer and re-authorise or re-build these connections for the logic apps to work correctly.**
-
-Alternatively, and much more fun will be to build these logic apps in the portal and then use the code view of the logic apps to paste in the JSON code of the logic apps. These can be found in the *logic-apps* folder with the names *receive-email.json* and *webhook.json*.
+The quickest approach wil be to manually build the key vault, storage account and Cognitive Services account and then to follow the [instructions here](templates/README.MD) to create the logic apps and their API connectors.
 
 ## Email account
 This demonstration makes use of emails as a means of receiving MP3 recordings and for sending the reply with the transcription text. It therefore needs an email account for this. You can either use an existing account or create a new one with Outlook.com or with Gmail.
