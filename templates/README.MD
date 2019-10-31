@@ -13,6 +13,20 @@ Either manually of from the main template deploy:
 
 Elsewhere in these documents further configuration of these is described, such as creating the containers in storage and the secrets in key vault.
 
+## Provision supporting parts
+If you really want to use an ARM template to provision the storage account, Cognitive Services account and key vault, then there is a template *speechsupport2.json* which can automatically do this.
+
+This template has a bunch of default values and you will need to change some of these:
+1. the storage account name has to be globally unique
+2. the congitive services account similarily
+3. Also the key vault account
+4. Most importantly, the template needs the *objectId* of an admin user of the target account for the key vault to provision
+
+```
+az group deployment create -g "speech2-rg"   --template-file speechsupport2.json  --name "speechsupport"   --query 'properties.provisioningState' -o tsv
+```
+This also creates the storage blob containers and the secrets BUT with test values. These will need to be overriden with values that relate to your instance of the demonstration.
+
 ### Provision the logic apps
 This can be done in the portal, but this has been shown to not return detailed enough errors. lternatively the CLI  gives much better errors than via the portal
 
