@@ -23,7 +23,7 @@ This template has a bunch of default values and you will need to change some of 
 4. Most importantly, the template needs the *objectId* of an admin user of the target account for the key vault to provision
 
 ```
-az group deployment create -g "speech2-rg"   --template-file speechsupport2.json  --name "speechsupport"   --query 'properties.provisioningState' -o tsv
+az group deployment create -g "speech-rg"   --template-file speechsupport2.json  --name "speechsupport"   --query 'properties.provisioningState' -o tsv
 ```
 This also creates the storage blob containers and the secrets BUT with test values. These will need to be overriden with values that relate to your instance of the demonstration.
 
@@ -31,9 +31,9 @@ This also creates the storage blob containers and the secrets BUT with test valu
 This can be done in the portal, but this has been shown to not return detailed enough errors. lternatively the CLI  gives much better errors than via the portal
 
 ```
-az group deployment create -g "trans-rg"   --template-file speechall.json  --name "speechall"   --query 'properties.provisioningState' -o tsv
+az group deployment create -g "speech-rg"   --template-file speechall.json  --name "speechall"   --query 'properties.provisioningState' -o tsv
 ```
-Where *trans-rg* is the name of the resource group. Your's may be different.
+Where *speech-rg* is the name of the resource group. Your's may be different.
 
 ### Amend the logic app connections
 The two logic apps shoould be deployed alongside three connector. These connectors will not be correct, but this can be fixed by going in turn to the two logic apps and fixing any connection errors.
