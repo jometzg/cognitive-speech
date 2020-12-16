@@ -3,6 +3,9 @@ Azure cognitive services has a number of easy to use capabilities. This demonstr
 
 A number of organisations would have uses for the automated transcription of audio. For example, financial services organisations often need to demonstrate that their selling processes are compliant with local regulations. So, the use of audio transcription can save a lot of manual effort listening to recordings of customer and advisor interactions. Sentiment analysis may also be used to flag specific recordings - allowing supervisors to concentrate on customer interactions which are different than normal.
 
+# Warning
+The cognitive services speech transcription API has now moved to version v3.0. Much of this has been written to v2.1 and there are issues with the webhooks for the v2.1 version in this demo. I have recently updated the code to v3.0, but this repository has not yet been updated. The new version of the API can be found and tested here https://centralus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/CopyModelToSubscription
+
 # This Demonstration
 This demonstation is a stand-alone one which uses cognitive services speech recognition with Azure serverless technologies to demonstrate audio transcription. To keep the demonstration self-contained, it uses audio MP3 file attachments to an email and then responds with the transcription in an email reply. This is not exactly how it would be done in production, but can easily be demonstrated.
 
