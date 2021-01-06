@@ -9,6 +9,8 @@ For more details on this see [here](https://docs.microsoft.com/en-us/azure/cogni
 
 The REST API is now at version 3.0. **There are significant changes between this and the prior 2.0/2.1 versions.**
 
+**This page is work in progress. I am updating this to show v3.0 only**
+
 ## Calling the REST API
 ### Request
 ```
