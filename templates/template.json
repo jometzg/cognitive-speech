@@ -1,304 +1,328 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "workflows_webhook_name": {
-            "defaultValue": "webhook",
-            "type": "string"
+        "storage_account_name": {
+            "defaultValue": "",
+            "type": "String"
         },
-        "connections_azureblob_name": {
-            "defaultValue": "azureblob",
-            "type": "string"
+         "connections_storage_key": {
+            "defaultValue": "",
+            "type": "String"
         },
-        "connections_outlook_1_name": {
-            "defaultValue": "outlook-1",
-            "type": "string"
+        "connections_storage_sas": {
+            "defaultValue": "",
+            "type": "String"
         },
-        "connections_keyvault_1_name": {
-            "defaultValue": "keyvault-1",
-            "type": "string"
-        },
-        "vaults_speechsecrets_prefix": {
-            "defaultValue": "speech",
-            "type": "string"
-        },
-        "vaults_tenant_id": {
-            "defaultValue": "<Replace_with_your_tenant_id>",
-            "type": "string"
-        },
-        "vaults_identity_id": {
-            "defaultValue": "<Replace_with_your_identity_Id>",
-            "type": "string"
-        },
-        "workflows_receive_email_name": {
-            "defaultValue": "receive-email",
-            "type": "string"
-        },
-        "storageAccounts_storagePrefix": {
-            "defaultValue": "speechsa",
-            "type": "string"
-        },
-        "accounts_cogPrefix": {
-            "defaultValue": "speech2",
-            "type": "string"
-        },
-        "actionGroups_Application_20Insights_20Smart_20Detection_name": {
-            "defaultValue": "Application%20Insights%20Smart%20Detection",
-            "type": "string"
+        "cognitive_key": {
+            "defaultValue": "",
+            "type": "String"
         }
     },
-    "variables": {
-        "uniqueStorageName": "[concat(parameters('storageAccounts_storagePrefix'), uniqueString(resourceGroup().id))]",
-        "cognitiveServicesAccountName": "[concat(parameters('accounts_cogPrefix'), uniqueString(resourceGroup().id))]",
-        "uniqueKeyVaultName": "[concat(parameters('vaults_speechsecrets_prefix'), uniqueString(resourceGroup().id), '-kv')]"
-    },
+    "variables": {},
     "resources": [
         {
-            "type": "Microsoft.CognitiveServices/accounts",
-            "apiVersion": "2017-04-18",
-            "name": "[variables('cognitiveServicesAccountName')]",
-            "location": "westeurope",
-            "sku": {
-                "name": "S0"
-            },
-            "kind": "SpeechServices",
-            "properties": {}
-        },
-        {
-            "type": "microsoft.insights/actionGroups",
-            "apiVersion": "2019-03-01",
-            "name": "[parameters('actionGroups_Application_20Insights_20Smart_20Detection_name')]",
-            "location": "Global",
-            "properties": {
-                "groupShortName": "SmartDetect",
-                "enabled": true,
-                "emailReceivers": [],
-                "smsReceivers": [],
-                "webhookReceivers": [],
-                "itsmReceivers": [],
-                "azureAppPushReceivers": [],
-                "automationRunbookReceivers": [],
-                "voiceReceivers": [],
-                "logicAppReceivers": [],
-                "azureFunctionReceivers": []
-            }
-        },
-        {
-            "type": "Microsoft.KeyVault/vaults",
-            "apiVersion": "2016-10-01",
-            "name": "[variables('uniqueKeyVaultName')]",
-            "location": "westeurope",
-            "properties": {
-                "sku": {
-                    "family": "A",
-                    "name": "Standard"
-                },
-                "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-                "accessPolicies": [
-                    {
-                        "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-                        "objectId": "bac496bb-9ff1-4244-952f-930ff37553e5",
-                        "permissions": {
-                            "keys": [
-                                "Get",
-                                "List",
-                                "Update",
-                                "Create",
-                                "Import",
-                                "Delete",
-                                "Recover",
-                                "Backup",
-                                "Restore"
-                            ],
-                            "secrets": [
-                                "Get",
-                                "List",
-                                "Set",
-                                "Delete",
-                                "Recover",
-                                "Backup",
-                                "Restore"
-                            ],
-                            "certificates": [
-                                "Get",
-                                "List",
-                                "Update",
-                                "Create",
-                                "Import",
-                                "Delete",
-                                "Recover",
-                                "Backup",
-                                "Restore",
-                                "ManageContacts",
-                                "ManageIssuers",
-                                "GetIssuers",
-                                "ListIssuers",
-                                "SetIssuers",
-                                "DeleteIssuers"
-                            ]
-                        }
-                    }
-                ],
-                "enabledForDeployment": false,
-                "enabledForDiskEncryption": false,
-                "enabledForTemplateDeployment": false
-            }
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2019-04-01",
-            "name": "[variables('uniqueStorageName')]",
-            "location": "westeurope",
-            "sku": {
-                "name": "Standard_RAGRS",
-                "tier": "Standard"
-            },
-            "kind": "StorageV2",
-            "properties": {
-                "networkAcls": {
-                    "bypass": "AzureServices",
-                    "virtualNetworkRules": [],
-                    "ipRules": [],
-                    "defaultAction": "Allow"
-                },
-                "supportsHttpsTrafficOnly": true,
-                "encryption": {
-                    "services": {
-                        "file": {
-                            "enabled": true
-                        },
-                        "blob": {
-                            "enabled": true
-                        }
-                    },
-                    "keySource": "Microsoft.Storage"
-                },
-                "accessTier": "Hot"
-            }
-        },
-        {
             "type": "Microsoft.Web/connections",
             "apiVersion": "2016-06-01",
-            "name": "[parameters('connections_azureblob_name')]",
-            "location": "westeurope",
+            "name": "azureblob",
+            "location": "[resourceGroup().location]",
+            "kind": "V1",
             "properties": {
-                "displayName": "jjspeechsa",
+                "displayName": "speechstorage",
                 "customParameterValues": {},
                 "api": {
-                    "id": "[concat('/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('connections_azureblob_name'))]"
+                    "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azureblob')]"
                 }
             }
         },
         {
             "type": "Microsoft.Web/connections",
             "apiVersion": "2016-06-01",
-            "name": "[parameters('connections_keyvault_1_name')]",
-            "location": "westeurope",
+            "name": "outlook",
+            "location": "[resourceGroup().location]",
+            "kind": "V1",
             "properties": {
-                "displayName": "jometzg@microsoft.com",
+                "displayName": "Outlook.com",
                 "customParameterValues": {},
                 "api": {
-                    "id": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/keyvault"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Web/connections",
-            "apiVersion": "2016-06-01",
-            "name": "[parameters('connections_outlook_1_name')]",
-            "location": "westeurope",
-            "properties": {
-                "displayName": "mrmetron@outlook.com",
-                "customParameterValues": {},
-                "api": {
-                    "id": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/outlook"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "2016-10-01",
-            "name": "[concat(variables('uniqueKeyVaultName'), '/cognitive-account')]",
-            "location": "westeurope",
-            "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', variables('uniqueKeyVaultName'))]"
-            ],
-            "properties": {
-                "value": "test",
-                "attributes": {
-                    "enabled": true
-                }
-            }
-        },
-        {
-            "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "2016-10-01",
-            "name": "[concat(variables('uniqueKeyVaultName'), '/cognitive-key')]",
-            "location": "westeurope",
-            "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', variables('uniqueKeyVaultName'))]"
-            ],
-            "properties": {
-                "value": "test",
-                "attributes": {
-                    "enabled": true
-                }
-            }
-        },
-        {
-            "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "2016-10-01",
-            "name": "[concat(variables('uniqueKeyVaultName'), '/input-sas')]",
-            "location": "westeurope",
-            "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', variables('uniqueKeyVaultName'))]"
-            ],
-            "properties": {
-                "value": "test",
-                "attributes": {
-                    "enabled": true
-                }
-            }
-        },
-        {
-            "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "2016-10-01",
-            "name": "[concat(variables('uniqueKeyVaultName'), '/storage-account')]",
-            "location": "westeurope",
-            "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', variables('uniqueKeyVaultName'))]"
-            ],
-            "properties": {
-                "value": "test",
-                "attributes": {
-                    "enabled": true
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts/blobServices",
-            "apiVersion": "2019-04-01",
-            "name": "[concat(variables('uniqueStorageName'), '/default')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageName'))]"
-            ],
-            "properties": {
-                "cors": {
-                    "corsRules": []
-                },
-                "deleteRetentionPolicy": {
-                    "enabled": false
+                    "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/outlook')]"
                 }
             }
         },
         {
             "type": "Microsoft.Logic/workflows",
             "apiVersion": "2017-07-01",
-            "name": "[parameters('workflows_webhook_name')]",
-            "location": "westeurope",
+            "name": "starttranscription",
+            "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/connections', parameters('connections_azureblob_name'))]",
-                "[resourceId('Microsoft.Web/connections', parameters('connections_outlook_1_name'))]"
+                "[resourceId('Microsoft.Web/connections', 'azureblob')]",
+                "[resourceId('Microsoft.Web/connections', 'outlook')]"
+            ],
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "When_a_new_email_arrives_(V2)": {
+                            "splitOn": "@triggerBody()?['value']",
+                            "metadata": {
+                                "Id::AQMkADAwATNiZmYAZC0xZTIxLTVkNmYtMDACLTAwCgAuAAADfMc2vrhOqECCJIcNmiyVbgEAad99FMndb0WERiaORLWMTQAAAgEMAAAA": "Inbox"
+                            },
+                            "type": "ApiConnectionNotification",
+                            "inputs": {
+                                "fetch": {
+                                    "method": "get",
+                                    "pathTemplate": {
+                                        "template": "/v2/Mail/OnNewEmail"
+                                    },
+                                    "queries": {
+                                        "fetchOnlyWithAttachment": true,
+                                        "folderPath": "Id::AQMkADAwATNiZmYAZC0xZTIxLTVkNmYtMDACLTAwCgAuAAADfMc2vrhOqECCJIcNmiyVbgEAad99FMndb0WERiaORLWMTQAAAgEMAAAA",
+                                        "importance": "Any",
+                                        "includeAttachments": true
+                                    }
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['outlook']['connectionId']"
+                                    }
+                                },
+                                "subscribe": {
+                                    "body": {
+                                        "NotificationUrl": "@{listCallbackUrl()}"
+                                    },
+                                    "method": "post",
+                                    "pathTemplate": {
+                                        "template": "/MailSubscriptionPoke/$subscriptions"
+                                    },
+                                    "queries": {
+                                        "fetchOnlyWithAttachment": true,
+                                        "folderPath": "Id::AQMkADAwATNiZmYAZC0xZTIxLTVkNmYtMDACLTAwCgAuAAADfMc2vrhOqECCJIcNmiyVbgEAad99FMndb0WERiaORLWMTQAAAgEMAAAA",
+                                        "importance": "Any"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Condition": {
+                            "actions": {
+                                "CreateRecordingBlob": {
+                                    "runAfter": {},
+                                    "type": "ApiConnection",
+                                    "inputs": {
+                                        "body": "@base64ToBinary(triggerBody()?['Attachments'][0]['ContentBytes'])",
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                            }
+                                        },
+                                        "method": "post",
+                                        "path": "/datasets/default/files",
+                                        "queries": {
+                                            "folderPath": "/inbound",
+                                            "name": "@variables('guid')",
+                                            "queryParametersSingleEncoded": true
+                                        }
+                                    },
+                                    "runtimeConfiguration": {
+                                        "contentTransfer": {
+                                            "transferMode": "Chunked"
+                                        }
+                                    }
+                                },
+                                "CreateReturnAddress": {
+                                    "runAfter": {
+                                        "CreateRecordingBlob": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "ApiConnection",
+                                    "inputs": {
+                                        "body": "@variables('Sender')",
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                            }
+                                        },
+                                        "method": "post",
+                                        "path": "/datasets/default/files",
+                                        "queries": {
+                                            "folderPath": "/outbound",
+                                            "name": "@{variables('guid')}.return.txt",
+                                            "queryParametersSingleEncoded": true
+                                        }
+                                    },
+                                    "runtimeConfiguration": {
+                                        "contentTransfer": {
+                                            "transferMode": "Chunked"
+                                        }
+                                    }
+                                },
+                                "HTTP": {
+                                    "runAfter": {
+                                        "CreateReturnAddress": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "Http",
+                                    "inputs": {
+                                        "body": {
+                                            "contentUrls": [
+                                                "[concat('https://', parameters('storage_account_name'), '.blob.core.windows.net/inbound/@{variables(''guid'')}@{variables(''sas'')}')]"
+                                            ],
+                                            "displayName": "@{variables('guid')}",
+                                            "locale": "en-US",
+                                            "properties": {
+                                                "diarizationEnabled": false,
+                                                "profanityFilterMode": "Masked",
+                                                "punctuationMode": "DictatedAndAutomatic",
+                                                "wordLevelTimestampsEnabled": false
+                                            }
+                                        },
+                                        "headers": {
+                                            "Content-Type": "application/json",
+                                            "Ocp-Apim-Subscription-Key": "@variables('key')"
+                                        },
+                                        "method": "POST",
+                                        "uri": "[concat('https://' , resourceGroup().location, '.api.cognitive.microsoft.com/speechtotext/v3.0/transcriptions')]"
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "GetKey": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "expression": {
+                                "and": [
+                                    {
+                                        "equals": [
+                                            "@triggerBody()?['Subject']",
+                                            "Tran"
+                                        ]
+                                    }
+                                ]
+                            },
+                            "type": "If"
+                        },
+                        "CreateGuid": {
+                            "runAfter": {
+                                "GetAttachmentName": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "guid",
+                                        "type": "string",
+                                        "value": "@{guid()}"
+                                    }
+                                ]
+                            }
+                        },
+                        "GetAttachmentName": {
+                            "runAfter": {
+                                "GetSender": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "AttachmentName",
+                                        "type": "string",
+                                        "value": "@{triggerBody()['Attachments'][0].Name}"
+                                    }
+                                ]
+                            }
+                        },
+                        "GetKey": {
+                            "runAfter": {
+                                "GetSAS": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "key",
+                                        "type": "string",
+                                        "value": "[parameters('connections_storage_key')]"
+                                    }
+                                ]
+                            }
+                        },
+                        "GetSAS": {
+                            "runAfter": {
+                                "CreateGuid": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "sas",
+                                        "type": "string",
+                                        "value": "[parameters('connections_storage_sas')]"
+                                    }
+                                ]
+                            }
+                        },
+                        "GetSender": {
+                            "runAfter": {},
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Sender",
+                                        "type": "string",
+                                        "value": "@triggerBody()?['From']"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "azureblob": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', 'azureblob')]",
+                                "connectionName": "azureblob",
+                                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azureblob')]"
+                            },
+                            "outlook": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', 'outlook')]",
+                                "connectionName": "outlook",
+                                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/outlook')]"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "webhook",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', 'azureblob')]",
+                "[resourceId('Microsoft.Web/connections', 'outlook')]"
             ],
             "properties": {
                 "state": "Enabled",
@@ -318,145 +342,10 @@
                             "inputs": {
                                 "schema": {
                                     "properties": {
-                                        "createdDateTime": {
+                                        "invocationId": {
                                             "type": "string"
                                         },
-                                        "datasets": {
-                                            "type": "array"
-                                        },
-                                        "description": {
-                                            "type": "string"
-                                        },
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "lastActionDateTime": {
-                                            "type": "string"
-                                        },
-                                        "locale": {
-                                            "type": "string"
-                                        },
-                                        "models": {
-                                            "items": {
-                                                "properties": {
-                                                    "createdDateTime": {
-                                                        "type": "string"
-                                                    },
-                                                    "datasets": {
-                                                        "type": "array"
-                                                    },
-                                                    "description": {
-                                                        "type": "string"
-                                                    },
-                                                    "id": {
-                                                        "type": "string"
-                                                    },
-                                                    "lastActionDateTime": {
-                                                        "type": "string"
-                                                    },
-                                                    "locale": {
-                                                        "type": "string"
-                                                    },
-                                                    "modelKind": {
-                                                        "type": "string"
-                                                    },
-                                                    "name": {
-                                                        "type": "string"
-                                                    },
-                                                    "properties": {
-                                                        "properties": {
-                                                            "ModelClass": {
-                                                                "type": "string"
-                                                            },
-                                                            "Purpose": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    },
-                                                    "status": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "modelKind",
-                                                    "datasets",
-                                                    "id",
-                                                    "createdDateTime",
-                                                    "lastActionDateTime",
-                                                    "status",
-                                                    "locale",
-                                                    "name",
-                                                    "description",
-                                                    "properties"
-                                                ],
-                                                "type": "object"
-                                            },
-                                            "type": "array"
-                                        },
-                                        "name": {
-                                            "type": "string"
-                                        },
-                                        "properties": {
-                                            "properties": {
-                                                "AddSentiment": {
-                                                    "type": "string"
-                                                },
-                                                "CustomPronunciation": {
-                                                    "type": "string"
-                                                },
-                                                "Duration": {
-                                                    "type": "string"
-                                                },
-                                                "ProfanityFilterMode": {
-                                                    "type": "string"
-                                                },
-                                                "PunctuationMode": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "reportFileUrl": {
-                                            "type": "string"
-                                        },
-                                        "results": {
-                                            "items": {
-                                                "properties": {
-                                                    "recordingsUrl": {
-                                                        "type": "string"
-                                                    },
-                                                    "resultUrls": {
-                                                        "items": {
-                                                            "properties": {
-                                                                "fileName": {
-                                                                    "type": "string"
-                                                                },
-                                                                "resultUrl": {
-                                                                    "type": "string"
-                                                                }
-                                                            },
-                                                            "required": [
-                                                                "fileName",
-                                                                "resultUrl"
-                                                            ],
-                                                            "type": "object"
-                                                        },
-                                                        "type": "array"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "recordingsUrl",
-                                                    "resultUrls"
-                                                ],
-                                                "type": "object"
-                                            },
-                                            "type": "array"
-                                        },
-                                        "status": {
-                                            "type": "string"
-                                        },
-                                        "statusMessage": {
+                                        "self": {
                                             "type": "string"
                                         }
                                     },
@@ -466,17 +355,66 @@
                         }
                     },
                     "actions": {
-                        "If_status_is_\"Succeeded\"": {
+                        "GetAttachmentName": {
+                            "runAfter": {
+                                "GetSAS": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "AttachmentName",
+                                        "type": "string"
+                                    }
+                                ]
+                            }
+                        },
+                        "GetSAS": {
+                            "runAfter": {
+                                "getKey": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "sas",
+                                        "type": "string",
+                                        "value": "[parameters('connections_storage_sas')]"
+                                    }
+                                ]
+                            }
+                        },
+                        "GetSender": {
+                            "runAfter": {
+                                "GetAttachmentName": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Sender",
+                                        "type": "string"
+                                    }
+                                ]
+                            }
+                        },
+                        "IfHasABody": {
                             "actions": {
-                                "Create_transcription_blob": {
+                                "Create_blob": {
                                     "runAfter": {
-                                        "Parse_JSON": [
+                                        "HTTPGetTranscription": [
                                             "Succeeded"
                                         ]
                                     },
                                     "type": "ApiConnection",
                                     "inputs": {
-                                        "body": "@body('Parse_JSON')?['AudioFileResults'][0].CombinedResults[0].Display",
+                                        "body": "@body('HTTPGetTranscription')?['combinedRecognizedPhrases'][0]['display']",
                                         "host": {
                                             "connection": {
                                                 "name": "@parameters('$connections')['azureblob']['connectionId']"
@@ -485,8 +423,8 @@
                                         "method": "post",
                                         "path": "/datasets/default/files",
                                         "queries": {
-                                            "folderPath": "/output",
-                                            "name": "@{body('Parse_JSON')?['AudioFileResults'][0].AudioFileName}.trans",
+                                            "folderPath": "/outbound",
+                                            "name": "@variables('AttachmentName')",
                                             "queryParametersSingleEncoded": true
                                         }
                                     },
@@ -496,9 +434,21 @@
                                         }
                                     }
                                 },
-                                "Get_return_address_blob_content": {
+                                "GetDisplayName": {
                                     "runAfter": {
-                                        "Create_transcription_blob": [
+                                        "HTTPGetSelf": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "SetVariable",
+                                    "inputs": {
+                                        "name": "AttachmentName",
+                                        "value": "@{body('HTTPGetSelf')?['displayName']}"
+                                    }
+                                },
+                                "GetSenderAddress": {
+                                    "runAfter": {
+                                        "Create_blob": [
                                             "Succeeded"
                                         ]
                                     },
@@ -510,186 +460,67 @@
                                             }
                                         },
                                         "method": "get",
-                                        "path": "/datasets/default/files/@{encodeURIComponent(encodeURIComponent('/output/',triggerBody()?['name'],'.return.txt'))}/content",
+                                        "path": "/datasets/default/files/@{encodeURIComponent(encodeURIComponent('/outbound/',variables('AttachmentName'),'.return.txt'))}/content",
                                         "queries": {
                                             "inferContentType": true
                                         }
                                     }
                                 },
-                                "HTTP": {
-                                    "runAfter": {},
-                                    "type": "Http",
-                                    "inputs": {
-                                        "method": "GET",
-                                        "uri": "@{triggerBody()?['results'][0].resultUrls[0].resultUrl}"
-                                    }
-                                },
-                                "Parse_JSON": {
+                                "HTTPGetFiles": {
                                     "runAfter": {
-                                        "HTTP": [
+                                        "GetDisplayName": [
                                             "Succeeded"
                                         ]
                                     },
-                                    "type": "ParseJson",
+                                    "type": "Http",
                                     "inputs": {
-                                        "content": "@body('HTTP')",
-                                        "schema": {
-                                            "properties": {
-                                                "AudioFileResults": {
-                                                    "items": {
-                                                        "properties": {
-                                                            "AudioFileName": {
-                                                                "type": "string"
-                                                            },
-                                                            "AudioFileUrl": {
-                                                                "type": "string"
-                                                            },
-                                                            "AudioLengthInSeconds": {
-                                                                "type": "number"
-                                                            },
-                                                            "CombinedResults": {
-                                                                "items": {
-                                                                    "properties": {
-                                                                        "ChannelNumber": {
-                                                                            "type": "string"
-                                                                        },
-                                                                        "Display": {
-                                                                            "type": "string"
-                                                                        },
-                                                                        "ITN": {
-                                                                            "type": "string"
-                                                                        },
-                                                                        "Lexical": {
-                                                                            "type": "string"
-                                                                        },
-                                                                        "MaskedITN": {
-                                                                            "type": "string"
-                                                                        }
-                                                                    },
-                                                                    "required": [
-                                                                        "ChannelNumber",
-                                                                        "Lexical",
-                                                                        "ITN",
-                                                                        "MaskedITN",
-                                                                        "Display"
-                                                                    ],
-                                                                    "type": "object"
-                                                                },
-                                                                "type": "array"
-                                                            },
-                                                            "SegmentResults": {
-                                                                "items": {
-                                                                    "properties": {
-                                                                        "ChannelNumber": {
-                                                                            "type": "string"
-                                                                        },
-                                                                        "Duration": {
-                                                                            "type": "integer"
-                                                                        },
-                                                                        "DurationInSeconds": {
-                                                                            "type": "number"
-                                                                        },
-                                                                        "NBest": {
-                                                                            "items": {
-                                                                                "properties": {
-                                                                                    "Confidence": {
-                                                                                        "type": "number"
-                                                                                    },
-                                                                                    "Display": {
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "ITN": {
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "Lexical": {
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "MaskedITN": {
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "Sentiment": {
-                                                                                        "properties": {
-                                                                                            "Negative": {
-                                                                                                "type": "number"
-                                                                                            },
-                                                                                            "Neutral": {
-                                                                                                "type": "number"
-                                                                                            },
-                                                                                            "Positive": {
-                                                                                                "type": "integer"
-                                                                                            }
-                                                                                        },
-                                                                                        "type": "object"
-                                                                                    },
-                                                                                    "Words": {}
-                                                                                },
-                                                                                "required": [
-                                                                                    "Confidence",
-                                                                                    "Lexical",
-                                                                                    "ITN",
-                                                                                    "MaskedITN",
-                                                                                    "Display",
-                                                                                    "Sentiment",
-                                                                                    "Words"
-                                                                                ],
-                                                                                "type": "object"
-                                                                            },
-                                                                            "type": "array"
-                                                                        },
-                                                                        "Offset": {
-                                                                            "type": "integer"
-                                                                        },
-                                                                        "OffsetInSeconds": {
-                                                                            "type": "number"
-                                                                        },
-                                                                        "RecognitionStatus": {
-                                                                            "type": "string"
-                                                                        },
-                                                                        "SpeakerId": {}
-                                                                    },
-                                                                    "required": [
-                                                                        "RecognitionStatus",
-                                                                        "ChannelNumber",
-                                                                        "SpeakerId",
-                                                                        "Offset",
-                                                                        "Duration",
-                                                                        "OffsetInSeconds",
-                                                                        "DurationInSeconds",
-                                                                        "NBest"
-                                                                    ],
-                                                                    "type": "object"
-                                                                },
-                                                                "type": "array"
-                                                            }
-                                                        },
-                                                        "required": [
-                                                            "AudioFileName",
-                                                            "AudioFileUrl",
-                                                            "AudioLengthInSeconds",
-                                                            "CombinedResults",
-                                                            "SegmentResults"
-                                                        ],
-                                                        "type": "object"
-                                                    },
-                                                    "type": "array"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
+                                        "headers": {
+                                            "Content-Type": "application/json",
+                                            "Ocp-Apim-Subscription-Key": "@variables('key')"
+                                        },
+                                        "method": "GET",
+                                        "uri": "@{body('HTTPGetSelf')?['links']['files']}"
                                     }
                                 },
-                                "Send_an_email": {
+                                "HTTPGetSelf": {
+                                    "runAfter": {},
+                                    "type": "Http",
+                                    "inputs": {
+                                        "headers": {
+                                            "Content-Type": "application/json",
+                                            "Ocp-Apim-Subscription-Key": "@variables('key')"
+                                        },
+                                        "method": "GET",
+                                        "uri": "@triggerBody()?['self']"
+                                    }
+                                },
+                                "HTTPGetTranscription": {
                                     "runAfter": {
-                                        "Get_return_address_blob_content": [
+                                        "HTTPGetFiles": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "Http",
+                                    "inputs": {
+                                        "headers": {
+                                            "Content-Type": "application/json"
+                                        },
+                                        "method": "GET",
+                                        "uri": "@{last(body('HTTPGetFiles')?['values'])['links']['contentUrl']}"
+                                    }
+                                },
+                                "Send_an_email_(V2)": {
+                                    "runAfter": {
+                                        "GetSenderAddress": [
                                             "Succeeded"
                                         ]
                                     },
                                     "type": "ApiConnection",
                                     "inputs": {
                                         "body": {
-                                            "Body": "@{body('Parse_JSON')?['AudioFileResults'][0].CombinedResults[0].Display}",
-                                            "Subject": "Your transcription",
-                                            "To": "@body('Get_return_address_blob_content')"
+                                            "Body": "<p>@{body('HTTPGetTranscription')?['combinedRecognizedPhrases'][0]['display']}</p>",
+                                            "Subject": "Speech Transcription",
+                                            "To": "@body('GetSenderAddress')"
                                         },
                                         "host": {
                                             "connection": {
@@ -697,287 +528,67 @@
                                             }
                                         },
                                         "method": "post",
-                                        "path": "/Mail"
+                                        "path": "/v2/Mail"
                                     }
                                 }
                             },
-                            "runAfter": {},
-                            "expression": {
-                                "and": [
-                                    {
-                                        "equals": [
-                                            "@triggerBody()?['status']",
-                                            "Succeeded"
-                                        ]
-                                    }
-                                ]
-                            },
-                            "type": "If"
-                        }
-                    },
-                    "outputs": {}
-                },
-                "parameters": {
-                    "$connections": {
-                        "value": {
-                            "azureblob": {
-                                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_azureblob_name'))]",
-                                "connectionName": "azureblob",
-                                "id": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/azureblob"
-                            },
-                            "outlook": {
-                                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_outlook_1_name'))]",
-                                "connectionName": "outlook-1",
-                                "id": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/outlook"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-            "apiVersion": "2019-04-01",
-            "name": "[concat(variables('uniqueStorageName'), '/default/input')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('uniqueStorageName'), 'default')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageName'))]"
-            ],
-            "properties": {
-                "publicAccess": "None"
-            }
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-            "apiVersion": "2019-04-01",
-            "name": "[concat(variables('uniqueStorageName'), '/default/output')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('uniqueStorageName'), 'default')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageName'))]"
-            ],
-            "properties": {
-                "publicAccess": "None"
-            }
-        },
-        {
-            "type": "Microsoft.Logic/workflows",
-            "apiVersion": "2017-07-01",
-            "name": "[parameters('workflows_receive_email_name')]",
-            "location": "westeurope",
-            "dependsOn": [
-                "[resourceId('Microsoft.Web/connections', parameters('connections_azureblob_name'))]",
-                "[resourceId('Microsoft.Web/connections', parameters('connections_keyvault_1_name'))]",
-                "[resourceId('Microsoft.Web/connections', parameters('connections_outlook_1_name'))]"
-            ],
-            "properties": {
-                "state": "Enabled",
-                "definition": {
-                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-                    "contentVersion": "1.0.0.0",
-                    "parameters": {
-                        "$connections": {
-                            "defaultValue": {},
-                            "type": "Object"
-                        }
-                    },
-                    "triggers": {
-                        "When_a_new_email_arrives": {
-                            "recurrence": {
-                                "frequency": "Minute",
-                                "interval": 3
-                            },
-                            "splitOn": "@triggerBody()?['value']",
-                            "type": "ApiConnection",
-                            "inputs": {
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['outlook']['connectionId']"
-                                    }
-                                },
-                                "method": "get",
-                                "path": "/Mail/OnNewEmail",
-                                "queries": {
-                                    "fetchOnlyWithAttachment": true,
-                                    "folderPath": "Inbox",
-                                    "importance": "Any",
-                                    "includeAttachments": true
-                                }
-                            }
-                        }
-                    },
-                    "actions": {
-                        "Get_cognitive-account": {
-                            "runAfter": {},
-                            "type": "ApiConnection",
-                            "inputs": {
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['keyvault_1']['connectionId']"
-                                    }
-                                },
-                                "method": "get",
-                                "path": "/secrets/@{encodeURIComponent('cognitive-account')}/value"
-                            }
-                        },
-                        "Get_storage-account": {
                             "runAfter": {
-                                "congitive-secret": [
+                                "GetSender": [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "ApiConnection",
-                            "inputs": {
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['keyvault_1']['connectionId']"
-                                    }
-                                },
-                                "method": "get",
-                                "path": "/secrets/@{encodeURIComponent('storage-account')}/value"
-                            }
-                        },
-                        "If_email_subject_is_\"audio\"": {
-                            "actions": {
-                                "For_each": {
-                                    "foreach": "@triggerBody()?['Attachments']",
-                                    "actions": {
-                                        "Call_batch_REST_API": {
-                                            "runAfter": {
-                                                "Create_return_address_blob": [
-                                                    "Succeeded"
-                                                ]
-                                            },
-                                            "type": "Http",
-                                            "inputs": {
-                                                "body": {
-                                                    "description": "<optional description of the transcription>",
-                                                    "locale": "en-US",
-                                                    "models": [],
-                                                    "name": "@{items('For_each')?['Name']}",
-                                                    "properties": {
-                                                        "AddSentiment": "True",
-                                                        "AddWordLevelTimestamps": "True",
-                                                        "ProfanityFilterMode": "Masked",
-                                                        "PunctuationMode": "DictatedAndAutomatic"
-                                                    },
-                                                    "recordingsUrls": [
-                                                        "@{body('Get_storage-account')?['value']}/input/@{encodeUriComponent(items('For_each')?['Name'])}@{body('input-sas')?['value']}"
+                            "else": {
+                                "actions": {
+                                    "CheckValidationToken": {
+                                        "actions": {
+                                            "RespondWithTokenValue": {
+                                                "runAfter": {},
+                                                "type": "Response",
+                                                "kind": "Http",
+                                                "inputs": {
+                                                    "body": "@triggerOutputs()?['queries']['validationToken']",
+                                                    "statusCode": 200
+                                                }
+                                            }
+                                        },
+                                        "runAfter": {},
+                                        "expression": {
+                                            "and": [
+                                                {
+                                                    "contains": [
+                                                        "@triggerOutputs()['queries']",
+                                                        "validationToken"
                                                     ]
-                                                },
-                                                "headers": {
-                                                    "Ocp-Apim-Subscription-Key": "@body('congitive-secret')?['value']"
-                                                },
-                                                "method": "POST",
-                                                "uri": "@{body('Get_cognitive-account')?['value']}/api/speechtotext/v2.1/transcriptions"
-                                            }
+                                                }
+                                            ]
                                         },
-                                        "Create_MP3_blob": {
-                                            "runAfter": {},
-                                            "type": "ApiConnection",
-                                            "inputs": {
-                                                "body": "@base64ToBinary(items('For_each')?['ContentBytes'])",
-                                                "host": {
-                                                    "connection": {
-                                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
-                                                    }
-                                                },
-                                                "method": "post",
-                                                "path": "/datasets/default/files",
-                                                "queries": {
-                                                    "folderPath": "/input",
-                                                    "name": "@items('For_each')?['Name']",
-                                                    "queryParametersSingleEncoded": true
-                                                }
-                                            },
-                                            "runtimeConfiguration": {
-                                                "contentTransfer": {
-                                                    "transferMode": "Chunked"
-                                                }
-                                            }
-                                        },
-                                        "Create_return_address_blob": {
-                                            "runAfter": {
-                                                "Create_MP3_blob": [
-                                                    "Succeeded"
-                                                ]
-                                            },
-                                            "type": "ApiConnection",
-                                            "inputs": {
-                                                "body": "@triggerBody()?['From']",
-                                                "host": {
-                                                    "connection": {
-                                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
-                                                    }
-                                                },
-                                                "method": "post",
-                                                "path": "/datasets/default/files",
-                                                "queries": {
-                                                    "folderPath": "/output",
-                                                    "name": "@{items('For_each')?['Name']}.return.txt",
-                                                    "queryParametersSingleEncoded": true
-                                                }
-                                            },
-                                            "runtimeConfiguration": {
-                                                "contentTransfer": {
-                                                    "transferMode": "Chunked"
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "runAfter": {},
-                                    "type": "Foreach",
-                                    "description": "for each attachment"
+                                        "type": "If"
+                                    }
                                 }
-                            },
-                            "runAfter": {
-                                "input-sas": [
-                                    "Succeeded"
-                                ]
                             },
                             "expression": {
                                 "and": [
                                     {
                                         "equals": [
-                                            "@triggerBody()?['Subject']",
-                                            "audio"
+                                            "@equals(triggerBody(), null)",
+                                            false
                                         ]
                                     }
                                 ]
                             },
                             "type": "If"
                         },
-                        "congitive-secret": {
-                            "runAfter": {
-                                "Get_cognitive-account": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "ApiConnection",
+                        "getKey": {
+                            "runAfter": {},
+                            "type": "InitializeVariable",
                             "inputs": {
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['keyvault_1']['connectionId']"
+                                "variables": [
+                                    {
+                                        "name": "key",
+                                        "type": "string",
+                                        "value": "[parameters('cognitive_key')]"
                                     }
-                                },
-                                "method": "get",
-                                "path": "/secrets/@{encodeURIComponent('cognitive-key')}/value"
-                            }
-                        },
-                        "input-sas": {
-                            "runAfter": {
-                                "Get_storage-account": [
-                                    "Succeeded"
                                 ]
-                            },
-                            "type": "ApiConnection",
-                            "inputs": {
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['keyvault_1']['connectionId']"
-                                    }
-                                },
-                                "method": "get",
-                                "path": "/secrets/@{encodeURIComponent('input-sas')}/value"
                             }
                         }
                     },
@@ -987,19 +598,14 @@
                     "$connections": {
                         "value": {
                             "azureblob": {
-                                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_azureblob_name'))]",
+                                "connectionId": "[resourceId('Microsoft.Web/connections', 'azureblob')]",
                                 "connectionName": "azureblob",
-                                "id": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/azureblob"
-                            },
-                            "keyvault_1": {
-                                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_keyvault_1_name'))]",
-                                "connectionName": "keyvault-1",
-                                "id": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/keyvault"
+                                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azureblob')]"
                             },
                             "outlook": {
-                                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_outlook_1_name'))]",
-                                "connectionName": "outlook-1",
-                                "id": "/subscriptions/2e500704-1ab3-49c6-bbbb-8b2bec98ffdc/providers/Microsoft.Web/locations/westeurope/managedApis/outlook"
+                                "connectionId": "[resourceId('Microsoft.Web/connections', 'outlook')]",
+                                "connectionName": "outlook",
+                                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/outlook')]"
                             }
                         }
                     }
