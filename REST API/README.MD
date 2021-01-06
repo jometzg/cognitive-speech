@@ -246,7 +246,7 @@ Webhooks allow you to register an endpoint to receive transcription results once
 
 Azure web apps, functions and logic apps can recieve webhooks.
 
-** Version 3.0 webhooks have undergone a considerable change since version 2.1. The webhook registration process actually calls your webhook in a specific manner during the registration process and unless you respond (from your logic app) correctly, the webhook will not get called. **
+**Version 3.0 webhooks have undergone a considerable change since version 2.1. The webhook registration process actually calls your webhook in a specific manner during the registration process and unless you respond (from your logic app) correctly, the webhook will not get called.**
 
 ## Register a webhook
 ### Request
