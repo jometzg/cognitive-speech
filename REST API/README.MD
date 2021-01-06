@@ -5,27 +5,29 @@ There are a number of ways of interacting with Azure Cognitive Services speech s
 2. The REST API can take MP3 files directly
 3. You can take advantage of webhook callbacks. This is especially important in serverless implemetations as you don't want long-running serverless calls.
 
-For more details on this see [here](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/batch-transcription)
+For more details on this see [here](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/batch-transcription).
+
+The REST API is now at version 3.0. **There are significant changes between this and the prior 2.0/2.1 versions.**
 
 ## Calling the REST API
 ### Request
 ```
-POST /api/speechtotext/v2.1/transcriptions/ HTTP/1.1
-Host: <region>.cris.ai
+POST /speechtotext/v3.0/transcriptions HTTP/1.1
+Host: <region>.api.cognitive.microsoft.com
 Content-Type: application/json
 Ocp-Apim-Subscription-Key: XXXXXXX-key-XXXXXXXXXX
 {
-  "description": "<optional description of the transcription>",
-  "locale": "en-US",
-  "models": [],
-  "name": "<name>",
-  "properties": {
-    "AddSentiment": "True",
-    "AddWordLevelTimestamps": "True",
-    "ProfanityFilterMode": "Masked",
-    "PunctuationMode": "DictatedAndAutomatic"
-  },
-  "recordingsUrls": ["<url to MP3 file (in blob storage)>"]
+  "contentUrls": [
+    list of URLs where the recordings are to be found. These need to be accessible by the services, so will need a SAS if Azure storage blobs
+  ],
+  "properties": {
+    "diarizationEnabled": false,
+    "wordLevelTimestampsEnabled": false,
+    "punctuationMode": "DictatedAndAutomatic",
+    "profanityFilterMode": "Masked"
+  },
+  "locale": "en-US",
+  "displayName": "Transcription using default model for en-US"
 }
 ```
 ### Response
