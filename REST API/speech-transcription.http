@@ -1,0 +1,56 @@
+### connections (better in settings.json)
+@endpoint = XXXX.cognitive.microsoft.com
+@subscriptionKey = YYYY
+
+### URL to MP3 file in blob storage with SAS
+@sas = 
+@blob = 
+
+### start a transcription using the default model for en-US
+POST https://{{endpoint}}/speechtotext/v3.1/transcriptions
+Content-Type: application/json
+Ocp-Apim-Subscription-Key: {{subscriptionKey}}
+
+{
+  "contentUrls": [
+    "{{blob}}{{sas}}"
+  ],
+  "properties": {
+    "diarizationEnabled": false,
+    "wordLevelTimestampsEnabled": false,
+    "punctuationMode": "DictatedAndAutomatic",
+    "profanityFilterMode": "Masked"
+  },
+  "locale": "en-US",
+  "displayName": "Transcription using default model for en-US"
+}
+
+### check the list of the transcriptions
+# @name translist 
+GET https://{{endpoint}}/speechtotext/v3.1/transcriptions
+Content-Type: application/json
+Ocp-Apim-Subscription-Key: {{subscriptionKey}}
+
+### get the transcriptionId from the list - here assuming there is only one transcription (not a good assumption)
+@transcriptionId = {{translist.response.body.values[0].self}}
+
+### get a specific transcription
+GET  {{transcriptionId}}
+Content-Type: application/json
+Ocp-Apim-Subscription-Key: {{subscriptionKey}}
+
+### get the references to the file of the text of the transcription
+# @name content
+GET {{transcriptionId}}/files
+Ocp-Apim-Subscription-Key: {{subscriptionKey}}
+
+####
+@transtext = {{content.response.body.values[0].links.contentUrl}}
+
+### now get the content of the transcription - this already has a SAS token, so no need to use a key
+# @name thejson
+GET {{transtext}}
+
+
+### get the transcription
+@transcription = {{thejson.response.body.combinedRecognizedPhrases[0].display}}
